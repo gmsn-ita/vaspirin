@@ -1,26 +1,28 @@
-#!/usr/bin/env python
+import numpy as np
 
 class BandStructure (object):
-
-	def __init__(self,fOutcar):
-		self.path=self.readPath(fOutcar)
-		self.Nbands=self.readNbands(fOutcar)
-		self.recLattice=self.readRecLattice(fOutcar)
-		self.eigenvals=self.readEigenvals(fOutcar)
-		self.eFermi=self.readEFermi(fOutcar)
-		self.nElec=self.NElec(fOutcar)
-		self.eValence=self.readEValence()
-
 	'''
 	Atributes:
-		path=[]
-		eigenvalues=[]
-		nbands=[]
-		efermi=[]
-		vbm=[]	
-		cbm=[]
+		path: list of all k-points from the current run
+		eigenvals: matrix eigenvalues[k-point - 1][band]
+		nBands: total number of bands simulated
+		eFermi: Fermi energy
+		nElec: total number of electrons in the cell
+		recLattice: list of the reciprocal lattice vectors
 	'''
+	
+	# Import all properties related to band structures
+	def __init__(self,fOutcar):
+		self.path = self.readPath(fOutcar)
+		self.nBands = self.readNbands(fOutcar)
+		self.recLattice = self.readRecLattice(fOutcar)
+		self.eigenvals = self.readEigenvals(fOutcar)
+		self.eFermi = self.readEFermi(fOutcar)
+		self.nElec = self.readNElec(fOutcar)
+		self.eValence = self.readEValence()
+		self.xAxis = self.createXaxis()
 
+	# nElec = total number of electrons in the cell
 	def readNElec(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
@@ -28,6 +30,7 @@ class BandStructure (object):
 		fileIn.close()
 		return  nElec 
 
+	# return the fundamental gap
 	def gap(self):
 		nval=self.nElec/2
 		v_band=[]
@@ -40,14 +43,15 @@ class BandStructure (object):
 
 		return gap
 
+	# return the valence band maximum
 	def readEValence(self):
-		nval=self.nElec/2
+		nval=int(self.nElec/2)
 		v_band=[]	
 		for k in range(len(self.path)):
 			v_band.append(self.eigenvals[k][nval-1])
 		return max(v_band)
 
-
+	# return the direct gap
 	def dGap(self):
 		nval=self.nElec/2
 		allGaps=[]
@@ -59,13 +63,13 @@ class BandStructure (object):
 
 		return gap
 
-
-	def xAxis(self):
+	# xAxis[k-point] = normalized value from 0 to 1 to favor plotting
+	def createXaxis(self):
 		x=[0]
 		aux=0
 		
 		for k in range(1, len(self.path)):
-			aux=aux+distance(self.recLattice,self.path[k],self.path[k-1])
+			aux=aux + distance(self.recLattice,self.path[k],self.path[k-1])
 			x.append(aux)	
 		norm=max(x)
 		for k in range(len(x)):
@@ -75,7 +79,7 @@ class BandStructure (object):
 
 
 
-
+	# eFermi = x.xxxx eV
 	def readEFermi(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
@@ -84,7 +88,7 @@ class BandStructure (object):
 		return  ef 	
 
 
-
+	# path = [k-point 1, k-point 2, ...]
 	def readPath(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
@@ -100,7 +104,9 @@ class BandStructure (object):
 
 		fileIn.close()
 		return  kpoints 
-
+	
+	# recLattice = [b1,b2,b3]
+	# b1 = [b1_x, b1_y, b1_z]
 	def readRecLattice(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
@@ -125,17 +131,16 @@ class BandStructure (object):
 		fileIn.close()
 		return  [b1,b2,b3] 
 
+	# eigenval[k-point][band]
 	def readEigenvals(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
 
 		eigenvals=[]
 		txtBlock=outcar.split('E-fermi :')[-1].split('---------------------------')[0]
-
-
 		kpoints=txtBlock.split('band No.  band energies     occupation')
 
-
+		# Obtaining the eigenvalues from OUTCAR
 		for k in range(1,len(kpoints)):
 			eigenvals.append([])
 			lines=kpoints[k].split('\n')
@@ -146,9 +151,7 @@ class BandStructure (object):
 		fileIn.close()
 		return  eigenvals 
 
-
-
-
+	# nBands = total number of bands
 	def readNbands(self,fOutcar):
 		fileIn=open(fOutcar,'r')
 		outcar=fileIn.read()
@@ -156,4 +159,10 @@ class BandStructure (object):
 		fileIn.close()
 		return  nbands 
 
+'''
+Auxiliary functions
+'''
 
+def distance (basis, p1, p2):
+	d = np.linalg.norm (np.dot(np.array(p1)-np.array(p2), np.array(basis)))
+	return d

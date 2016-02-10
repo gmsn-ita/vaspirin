@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 class DOS (object):
 	def __init__(self,fDoscar):
 		self.NEDOS=self.readNEDOS(fDoscar)

@@ -11,9 +11,9 @@ class PROCAR (object):
 	'''
 
 	def __init__ (self, fProcar):
-		self.Nbands = self.readNbands (fProcar)
-		self.Nkpoints = self.readNkpoints (fProcar)
-		self.Nions = self.readNions (fProcar)
+		self.nBands = self.readNbands (fProcar)
+		self.nKpoints = self.readNkpoints (fProcar)
+		self.nIons = self.readNions (fProcar)
 		self.orbitalContributions = self.readOrbitalContribution (fProcar)
 		self.ionContributions = self.readIonContribution (fProcar)
 	
@@ -86,7 +86,7 @@ class PROCAR (object):
 		fileIn=open(fProcar,'r')
 		procar = fileIn.read()
 		
-		# contributions[kpoint][band][ion]
+		# contributions[k-point][band][ion]
 		contributions = []
 		
 		kptBlock = procar.split('k-point')
@@ -112,13 +112,3 @@ class PROCAR (object):
 		fileIn.close()        
 		
 		return contributions
-			
-		
-
-def main():
-		# my code here
-		teste = PROCAR('PROCAR')
-		print(teste.ionContributions)
-
-if __name__ == "__main__":
-		main()
