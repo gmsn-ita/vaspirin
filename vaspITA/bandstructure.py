@@ -21,6 +21,13 @@ class BandStructure (object):
 		self.nElec = self.readNElec(fOutcar)
 		self.eValence = self.readEValence()
 		self.xAxis = self.createXaxis()
+		self.reference = 0
+	
+	'''
+	Set a new reference for the eigenvalues
+	'''
+	def setReference (self, newRef):
+		self.reference = newRef
 
 	# nElec = total number of electrons in the cell
 	def readNElec(self,fOutcar):
