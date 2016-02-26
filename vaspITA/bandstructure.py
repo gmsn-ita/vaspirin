@@ -21,7 +21,7 @@ class BandStructure (object):
 		self.nElec = self.readNElec(fOutcar)
 		self.eValence = self.readEValence()
 		self.xAxis = self.createXaxis()
-		self.reference = 0
+		self.reference = self.eValence
 	
 	'''
 	Set a new reference for the eigenvalues

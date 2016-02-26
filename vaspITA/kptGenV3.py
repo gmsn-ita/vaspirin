@@ -16,7 +16,7 @@ def genKPT(args):
 	# Verify number of arguments
 	if len(args) < 4:
 		print ("Not enough arguments! Please specify:")
-		print ("Minimum number of Kpoints and path")
+		print ("Minimum number of k-points and path")
 
 
 	# kpoints generation specifications for the hexagonal cell
@@ -28,9 +28,9 @@ def genKPT(args):
 	#path = ['G', 'K', 'M', 'G']
 
 	G = np.array([0.000, 0.000, 0.000])
-	K = np.array([0.667, 0.333, 0.000])
+	K = np.array([2/3, 1/3, 0.000])
 	M = np.array([0.500, 0.000, 0.000])
-	H = np.array([0.667, 0.333, 0.500])
+	H = np.array([2/3, 1/3, 0.500])
 	A = np.array([0.000, 0.000, 0.500])
 	L = np.array([0.500, 0.000, 0.500])
 	Y = np.array([0.000, 0.500, 0.000])
@@ -60,15 +60,10 @@ def genKPT(args):
 
 	# Write path to file
 	with open ("KPOINTS_gen", 'w') as output_file:
-		output_file.write ('Points = ')
 		for i in range(len(path)):
-			output_file.write ("%s " % path[i])
-
-		output_file.write (', Index = ')
-		for i in range(len(symIndex)):
-			output_file.write ("%d " % symIndex[i])
-
-		output_file.write (', Hexagonal\n')
+			output_file.write ("%s %d," % (path[i],symIndex[i]))
+		output_file.write ('\n')
+		
 		output_file.write ('%d\n' % len(xPath))
 		output_file.write ('Reciprocal lattice\n')
 
