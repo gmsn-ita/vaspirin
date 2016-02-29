@@ -27,7 +27,8 @@ class DatFiles (object):
 				outputFile.write ("\n")
 	
 	'''
-	Creates the orbital.dat file
+	Creates the bands_character folder
+	Each file contains the eigenvalues and contributions projected for each band
 	Format:
 	1st column) normalized k-point (from 0 to 1, derived from the path length)
 	2nd column) eigenvalue
@@ -39,8 +40,14 @@ class DatFiles (object):
 	6th column) contribution of the d orbitals
 	
 	Depending on the functions, the contributions of other orbitals, e.g. dz2, may be explicited in other columns
+	However, this requires modifications on the code not yet implemented
+	
+	The markerSize variable scales the size of the marker plotted
 	'''
-	def datCharacter (self, bandStructure, bandCharacter):
+	def datCharacter (self, bandStructure, bandCharacter, markerSize):
+		if markerSize <= 0:
+			markerSize = 0.5
+			
 		try:
 			os.mkdir ('bands_character')
 		except:
@@ -52,12 +59,13 @@ class DatFiles (object):
 				for kpoint in range(len(bandStructure.xAxis)):
 					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
 					for contrib in bandCharacter.orbitalContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % contrib)
+						outputFile.write(" %1.4f" % (float(contrib)*float(markerSize)))
 					outputFile.write ("\n")
 				outputFile.write ("\n")
 		
 	'''
-	Creates the projected.dat file
+	Creates the bands_projected folder
+	Each file in the folder contains the eigenvalues and contributions projected for each band
 	Format:
 	1st column) normalized k-point (from 0 to 1, derived from the path length)
 	2nd column) eigenvalue
@@ -66,19 +74,29 @@ class DatFiles (object):
 	3rd column) contribution of the 1st material
 	4th column) contribution of the 2nd material
 	... and so on
+	
+	The markerSize variable scales the size of the marker plotted
 	'''
-	def datProjected (self, bandStructure, bandCharacter):
-		with open ("projected.dat",'w') as outputFile:
-			for band in range(bandStructure.nBands):
+	def datProjected (self, bandStructure, bandCharacter, markerSize):
+		if markerSize <= 0:
+			markerSize = 0.5
+			
+		try:
+			os.mkdir ('bands_projected')
+		except:
+			shutil.rmtree ('bands_projected')
+			os.mkdir ('bands_projected')
+			
+		for band in range(bandStructure.nBands):
+			with open ("bands_projected/band%02d.dat" % int(band+1),'w') as outputFile:
 				for kpoint in range(len(bandStructure.xAxis)):
 					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
-					
 					for contrib in bandCharacter.materialContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % contrib)
+						outputFile.write(" %1.4f" % (float(contrib)*float(markerSize)))
 					outputFile.write ("\n")
-					
 				outputFile.write ("\n")
-
+				
+				
 class GraceConstants (object):
 	colors = {
 	"white" : 0,
@@ -224,6 +242,7 @@ class Grace (object):
 	
 	# Configure the bands with character
 	def printTracesCharacter (self, outputFile, bands):
+			
 		for i in range (1, bands.nBands + 1):
 			outputFile.write ("read block \"bands_character/band%02i.dat\"\n" % (i))
 			for j in range (4):
@@ -242,6 +261,36 @@ class Grace (object):
 				outputFile.write ("s%d line color 7\n" % (4*(i-1) + j))
 				outputFile.write ("s%d comment \"Band %d\"\n" % (4*(i-1) + j,i))
 				outputFile.write ("s%d legend  \"\"\n" % (4*(i-1) + j))
+		
+	
+	# Configure the bands projected onto the materials
+	def printTracesProjected (self, outputFile, bands, projectedBands):
+		
+		nMaterials = len(projectedBands.dictMaterials)
+			
+		for i in range (1, bands.nBands + 1):
+			outputFile.write ("read block \"bands_projected/band%02i.dat\"\n" % (i))
+
+			for j in range (nMaterials):
+				outputFile.write ("block xysize \"1:2:%d\"\n" % (j+3))
+				if (j == 0):
+					outputFile.write ("s%d symbol 1\n" % (nMaterials*(i-1) + j))
+				else:
+					outputFile.write ("s%d symbol 6\n" % (nMaterials*(i-1) + j))
+				
+				outputFile.write ("s%d symbol size 1\n" % (nMaterials*(i-1) + j))
+				outputFile.write ("s%d symbol color %d\n" % (nMaterials*(i-1) + j, j+nMaterials))
+				outputFile.write ("s%d symbol linewidth 1\n" % (nMaterials*(i-1) + j))
+				outputFile.write ("s%d symbol skip 0\n" % (nMaterials*(i-1) + j))
+				if (j == 0):
+					outputFile.write ("s%d line type 1\n" % (nMaterials*(i-1) + j))
+				else:
+					outputFile.write ("s%d line type 0\n" % (nMaterials*(i-1) + j))			
+				outputFile.write ("s%d line linestyle 1\n" % (nMaterials*(i-1) + j))
+				outputFile.write ("s%d line linewidth 1\n" % (nMaterials*(i-1) + j))
+				outputFile.write ("s%d line color 7\n" % (nMaterials*(i-1) + j))
+				outputFile.write ("s%d comment \"Band %d\"\n" % (nMaterials*(i-1) + j,i))
+				outputFile.write ("s%d legend  \"\"\n" % (nMaterials*(i-1) + j))
 	
 	
 	# Configure labels
@@ -250,7 +299,14 @@ class Grace (object):
 		outputFile.write ("yaxis  label char size 2.000000\n")
 		outputFile.write ("xaxis  label char size 2.000000\n")
 		outputFile.write ("yaxis  label font 14\n")
-
+		
+	# Exporting PS files from XMGrace
+	def printExportPS (self, outputFile, psName):
+		outputFile.write ("PRINT TO \"%s.ps\"\n" % psName)
+		outputFile.write ("HARDCOPY DEVICE \"PS\"\n")
+		outputFile.write ("PRINT\n")
+		
+		
 
 	'''
 	Prints a .bfile for a common band structure
@@ -268,11 +324,12 @@ class Grace (object):
 			self.printTraces (outputFile, bands)
 			self.printLabel (outputFile)
 			
-			#self.printExportPS (outputFile)
+			#self.printExportPS (outputFile, 'bands')
 	
 	'''
 	Prints a .bfile for a band structure with character
 	This method contains all needed settings
+	The variable markerSize specifies the size of the marker while printing the bands
 	'''
 	def printBandCharacter (self, bands):
 		with open ('bandsCharacter.bfile', 'w') as outputFile:				
@@ -281,8 +338,25 @@ class Grace (object):
 			'''
 			
 			self.printFontSection (outputFile)
-			self.printAxis (outputFile, bands)
 			self.printTracesCharacter (outputFile, bands)
+			self.printAxis (outputFile, bands)
 			self.printLabel (outputFile)
 			
-			#self.printExportPS (outputFile)
+			#self.printExportPS (outputFile, 'bandsOrbitals')
+	
+	'''
+	Prints a .bfile for a band structure projected onto the specified materials (file PROJECTION)
+	This method contains all needed settings
+	'''
+	def printBandProjected (self, bands, projectedBands):
+		with open ('bandsProjected.bfile', 'w') as outputFile:				
+			'''
+			Read the file
+			'''
+			
+			self.printFontSection (outputFile)
+			self.printTracesProjected (outputFile, bands, projectedBands)
+			self.printAxis (outputFile, bands)			
+			self.printLabel (outputFile)
+			
+			#self.printExportPS (outputFile, 'bandsProjected')

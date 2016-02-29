@@ -1,2 +1,4 @@
-# vasp-ita
+# vaspirin
 Post-processing files for VASP made by GMSN
+
+Run the script: $ python -m vaspirin
