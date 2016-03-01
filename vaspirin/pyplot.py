@@ -8,6 +8,23 @@ import pylab as pl
 from itertools import cycle
 
 
+def Xticks (fKpoints):
+	fileIn= open (fKpoints, 'r')
+	label = []
+	index= []
+	header=fileIn.read().split('\n')[0].split(',')	
+	for point in header:
+		label.append(point.split()[0])		
+		index.append(int(point.split()[1]))
+	for i in range(len(label)):
+		if label[i]=='G':
+			label[i]='$\Gamma$'
+	
+	
+	return (index,label)
+
+
+
 def plotBS(bsData,figureName):
 	bsData.setReference(bsData.eFermi)
 	for k1 in range(bsData.nBands):
@@ -19,10 +36,18 @@ def plotBS(bsData,figureName):
 	#Setting plot
 	pl.xlim(min(bsData.xAxis), max(bsData.xAxis))
 	pl.ylim(-6, 6)
-	pl.xlabel(r'High Symmetry Path',fontsize=16)
+
 	pl.ylabel(r'E - E$_F$ (eV)',fontsize=16)
-	pl.tick_params(axis='x',      labelbottom='off')
-	pl.plot([min(bsData.xAxis), max(bsData.xAxis)],[0,0],'k--')
+	#pl.plot([min(bsData.xAxis), max(bsData.xAxis)],[0,0],'k--')
+
+	#LABELLING X AXIS 
+	index,label =Xticks ('KPOINTS')
+	loc=[]
+	for x in index:
+		loc.append(bsData.xAxis[x])
+	plt.xticks(loc,label,fontsize=16)
+	
+
 	pl.savefig(figureName)
 	return 0
 
@@ -47,30 +72,28 @@ def plotBSDOS(bsData,dosData,figureName):
 	#PLOT 121 = BS
 	plt.subplot(121)
 	#Setting plot 1
-	plt.tick_params(axis='x',      labelbottom='off')
 	plt.xlim(min(bsData.xAxis), max(bsData.xAxis))
 	plt.ylim(min(dosData.energies), max(dosData.energies))
-	plt.xlabel(r'High Symmetry Path',fontsize=16)
+	#LABELLING X AXIS 
+	index,label =Xticks ('KPOINTS')
+	loc=[]
+	for x in index:
+		loc.append(bsData.xAxis[x])
+	plt.xticks(loc,label,fontsize=16)
 	plt.ylabel(r'E - E$_F$ (eV)',fontsize=16)
 	plt.plot([min(bsData.xAxis), max(bsData.xAxis)],[0,0],'k--')
-
-
-
 	bsData.setReference(bsData.eFermi)
 	for k1 in range(bsData.nBands):
 		band=[]
 		for k2 in range(len(bsData.xAxis)):
 			band.append(bsData.eigenvals[k2][k1]-bsData.reference)
 		pl.plot(bsData.xAxis,band,'k')
-
-
 	#PLOT 122 = DOS
 	plt.subplot(122)
 	dosData.setReference(dosData.eFermi)
 	EnergyAxis=[]
 	for e in dosData.energies:
 		EnergyAxis.append(e-dosData.reference) 
-
 	#Setting plot 2
 	plt.ylim(min(dosData.energies), max(dosData.energies))
 	plt.xlim(0, 1.2*max(dosData.states))
@@ -78,7 +101,6 @@ def plotBSDOS(bsData,dosData,figureName):
 	plt.tick_params(axis='y',      labelleft='off')
 	plt.plot([min(dosData.states), 1.2*max(dosData.states)],[0,0],'k--')
 	pl.plot(dosData.states,EnergyAxis,'k')
-
 	#OUTPUT
 	plt.savefig(figureName)
 	return 0
