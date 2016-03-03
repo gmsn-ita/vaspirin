@@ -56,8 +56,9 @@ if __name__ == "__main__":
 	from . import *
 	
 	###########################################     CODE     #######################################################
-	print ('\n**************************************************\n**************************************************')
+	print ('\n**************************************************\n')
 	print ('WELCOME TO VASPIRIN.PY \n')
+	print ('\n**************************************************\n')
 
 
 
@@ -150,5 +151,21 @@ if __name__ == "__main__":
 
 		#call plotter methods
 
+	#PYPLOT FLAG
+	[flagPLOT,figureName] = testFlag('-pyplot', 'figure',sys.argv)
+	if flagPLOT:
+		print ('Printing results on:', figureName)
 
+		#call plotter methods
+		if flagBS:
+			if flagDOS:
+				pyplot.plotBSDOS(bsData,dosData,figureName)
+			elif flagCHAR:
+				pyplot.plotBSCHAR(bsData,procarData,figureName)
+			else:
+				pyplot.plotBS(bsData,figureName)
+
+		else:
+			if flagDOS:
+				pyplot.plotDOS(dosData,figureName)
 
