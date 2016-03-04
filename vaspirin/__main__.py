@@ -7,7 +7,7 @@ This is the main script from vaspirin.py
 call it using: vaspita -$tags -$DesiredFileNames
 
 READING TAGS:
-By default, the informations are extracted from OUTCAR and PROCAR files. If tag -fromdat is activated, vaspita will only read the information from the given .dat file.
+By default, informations are extracted from OUTCAR and PROCAR files. If tag -fromdat is activated, vaspita will only read the information from the given .dat file.
 
 -dos: ask for Density of State informations.
 -bs: ask for Electronic Band Structure informations.
@@ -56,16 +56,16 @@ if __name__ == "__main__":
 	from . import *
 	
 	###########################################     CODE     #######################################################
-	print ('\n**************************************************\n')
-	print ('WELCOME TO VASPIRIN.PY \n')
-	print ('\n**************************************************\n')
+	print ('\n**************************************************')
+	print ('WELCOME TO VASPIRIN.PY')
+	print ('**************************************************\n')
 
 
 
-	print ('Made by: I. Guilhon and D. S. Koda.\n')
-	print ('Group of Semiconductor Materials and Nanotechnology\n')
-	print ('Instituto Tecnológico de Aeronáutica\n')
-	print ('http://www.gmsn.ita.br/?q=en\n')
+	print ('Made by: I. Guilhon and D. S. Koda.')
+	print ('Group of Semiconductor Materials and Nanotechnology')
+	print ('Instituto Tecnológico de Aeronáutica')
+	print ('http://www.gmsn.ita.br/?q=en')
 	print ('STARTING LOG...')
 
 	###################################     IDENTIFICATING TASKS        #########################################
@@ -101,19 +101,28 @@ if __name__ == "__main__":
 		dosData=dos.DOS(DOSCARfile)
 
 
-	#CHAR FLAG
+	# CHAR FLAG
 	[flagCHAR,PROCARfile] = testFlag('-char', 'PROCAR',sys.argv)
 	if flagCHAR and not(flagFROMDAT):
 		print ('Band Character info extracted from:', PROCARfile)
 		procarData=bandcharacter.PROCAR(PROCARfile)
 
 
-	print (sys.argv)
-	#PROJ FLAG
+	# PROJ FLAG
 	[flagPROJ,PROCARfile] = testFlag('-proj', 'PROCAR',sys.argv)
+	[flagPROJFILE,PROJECTIONfile] = testFlag('-projdata', 'PROJECTION',sys.argv)
+	
 	if flagPROJ and not(flagFROMDAT):
 		print ('Projection on atomic orbitals info extracted from:', PROCARfile)
-
+		
+		projData = bandcharacter.PROCAR (PROCARfile)
+		
+		# Opens the file 'PROJECTION' if the argument -projdata is not specified
+		projData.createIonVsMaterials (PROJECTIONfile)
+		
+		'''
+		# OLD WAY OF READING THE ARGUMENTS FOR PROJECTION
+		# TODAY, THIS FUNCTION IS DONE BY READING THE FILE 'PROJECTION'
 		
 		#reading [projection settings]:  -proj >>[mat1=...;mat2=...;...]<< -othertags
 		readingProj=True
@@ -128,14 +137,10 @@ if __name__ == "__main__":
 				readingProj=False
 			k=k+1
 		print (projectionArgs)
-		
+		'''
 
-			
-
-			
-		
-
-		#call projection methods
+	[flagKPOINTS,KPOINTSfile] = testFlag('-kpt', 'KPOINTS',sys.argv)
+	
 
 	#KPTGEN FLAG
 	#these methods will not read files, but only write new ones.  
@@ -144,19 +149,55 @@ if __name__ == "__main__":
 
 	###################################     MAKING OUTPUTS        #########################################
 
-	#PLOT FLAG
+	# PLOT FLAG
 	[flagPLOT,figureName] = testFlag('-plot', 'figure',sys.argv)
 	if flagPLOT:
-		print ('Printing results on:', figureName)
+		dat = plotter.DatFiles ()
+		plt = plotter.Grace ()
+		
+		# Optional argument: markerSize tunes the size of the marker on projected band structures
+		markerSize = -1
+		
+		# Yet to implement: export PDF to figureName
+		print ('Printing results on:', figureName, '\n')
+		
+		# Reading the KPOINTS file:
+		try:
+			plt.readXticks (KPOINTSfile)
+		except:
+			print ("KPOINTS file not found. Plotting without k-points on the x axis...")
+		
+		
+		# plot using XMGrace
+		if flagBS:
+			if flagDOS:
+				print ("Feature not yet implemented. Feel free to work on it if you want!")
+				# Print DOS with bands
+			
+			elif flagCHAR:
+				dat.datCharacter (bsData, procarData, markerSize)
+				plt.printBandCharacter (bsData)
+				print ("Print the results using XMgrace\n $ xmgrace -batch bandsCharacter.bfile")
+				
+			elif flagPROJ:
+				dat.datProjected (bsData, projData, markerSize)
+				plt.printBandProjected (bsData)
+				print ("Print the results using XMgrace\n $ xmgrace -batch bandsProjected.bfile")
+			else:
+				dat.datEigenvals (bsData)
+				plt.printBandStructure (bsData)
+				print ("Print the results using XMgrace\n $ xmgrace -batch bands.bfile")
+		else:
+			if flagDOS:
+				print ("Feature not yet implemented. Feel free to work on it if you want!")
+		
 
-		#call plotter methods
-
-	#PYPLOT FLAG
+	# PYPLOT FLAG
 	[flagPLOT,figureName] = testFlag('-pyplot', 'figure',sys.argv)
+	
 	if flagPLOT:
 		print ('Printing results on:', figureName)
 
-		#call plotter methods
 		if flagBS:
 			if flagDOS:
 				pyplot.plotBSDOS(bsData,dosData,figureName)
