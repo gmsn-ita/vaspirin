@@ -1,7 +1,12 @@
 # vaspirin
-Post-processing files for VASP made by GMSN
+Painless post-processing tools for VASP
+Made by Daniel S. Koda and Ivan Guilhon @ GMSN
 
 Install the script by executing:
 $ python setup.py install --user
 OR
 # python setup.py install
+
+Execute the package by using:
+$ vaspirin -$tags -$DesiredFileNames
+For further information on how to use this package, please refer to the instructions manual
