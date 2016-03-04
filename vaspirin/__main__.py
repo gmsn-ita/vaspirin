@@ -24,7 +24,7 @@ OUTPUT AND PLOTTING TAGS:
 
 
 WRITING TAGS:
--kptgen: generate one a KPOINTS file with a desired path
+-kptgen: generate one KPOINTS file with a desired path
 
 
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
 	# PROJ FLAG
 	[flagPROJ,PROCARfile] = testFlag('-proj', 'PROCAR',sys.argv)
-	[flagPROJFILE,PROJECTIONfile] = testFlag('-projdata', 'PROJECTION',sys.argv)
+	[flagPROJFILE,PROJECTIONfile] = testFlag('-projfile', 'PROJECTION',sys.argv)
 	
 	if flagPROJ and not(flagFROMDAT):
 		print ('Projection on atomic orbitals info extracted from:', PROCARfile)
@@ -119,25 +119,6 @@ if __name__ == "__main__":
 		
 		# Opens the file 'PROJECTION' if the argument -projdata is not specified
 		projData.createIonVsMaterials (PROJECTIONfile)
-		
-		'''
-		# OLD WAY OF READING THE ARGUMENTS FOR PROJECTION
-		# TODAY, THIS FUNCTION IS DONE BY READING THE FILE 'PROJECTION'
-		
-		#reading [projection settings]:  -proj >>[mat1=...;mat2=...;...]<< -othertags
-		readingProj=True
-		projectionArgs=''
-		k =(sys.argv).index('-proj')+1
-		while k < len(sys.argv) and readingProj:
-			projectionArgs=projectionArgs+sys.argv[k]
-			try:		
-				if(sys.argv[k+1][0]=='-'):
-					readingProj=False
-			except (IOError,IndexError,RuntimeError, TypeError, NameError):
-				readingProj=False
-			k=k+1
-		print (projectionArgs)
-		'''
 
 	[flagKPOINTS,KPOINTSfile] = testFlag('-kpt', 'KPOINTS',sys.argv)
 	
@@ -181,7 +162,7 @@ if __name__ == "__main__":
 				
 			elif flagPROJ:
 				dat.datProjected (bsData, projData, markerSize)
-				plt.printBandProjected (bsData)
+				plt.printBandProjected (bsData, projData)
 				print ("Print the results using XMgrace\n $ xmgrace -batch bandsProjected.bfile")
 			else:
 				dat.datEigenvals (bsData)
