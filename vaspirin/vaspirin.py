@@ -34,7 +34,8 @@ WRITING TAGS:
 
 
 
-###########################################   METHODS    #######################################################
+###########################################   FUNCTIONS    #######################################################
+
 def testFlag(tag, defaultName,args):
 	fileName=defaultName
 	flag=False
@@ -51,6 +52,42 @@ def testFlag(tag, defaultName,args):
 	return [flag, fileName]
 
 
+# Same as function testFlag, but receives two arguments for the tag
+def testFlag2args(tag, default1, default2, args):
+	attribute1 = default1
+	attribute2 = default2
+	
+	flag=False
+	
+	if tag in  args:
+		flag=True
+		index= (sys.argv).index(tag)
+		
+		# Try to read the first attribute
+		try:
+			newName1 = sys.argv[index + 1]
+			if  newName1[0] != '-':
+				attribute1 = newName1
+			elif newName1[1].isnumeric():
+				attribute1 = newName1
+				
+		# If the reading fails, returns to the default value
+		except (IOError,IndexError,RuntimeError, TypeError, NameError):
+			attribute1 = default1
+		
+		# Try to read the second attribute
+		try:
+			newName2 = sys.argv[index + 2]
+			if  newName2[0] != '-':
+				attribute2 = newName2
+			elif newName2[1].isnumeric():
+				attribute2 = newName2
+				
+		# If the reading fails, returns to the default value
+		except (IOError,IndexError,RuntimeError, TypeError, NameError):
+			attribute2 = default2	
+
+	return [flag, attribute1, attribute2]
 
 
 def main():
@@ -122,7 +159,6 @@ def main():
 
 	[flagKPOINTS,KPOINTSfile] = testFlag('-kpt', 'KPOINTS',sys.argv)
 	
-
 	#KPTGEN FLAG
 	#these methods will not read files, but only write new ones.  
 
@@ -148,6 +184,11 @@ def main():
 		except:
 			print ("KPOINTS file not found. Plotting without k-points on the x axis...")
 		
+		# Read the y axis minimum and maximum values
+		[flagYAXIS, yMin, yMax] = testFlag2args ('-yaxis', -3, 3, sys.argv)
+
+		if flagYAXIS:
+			plt.setYaxis (float(yMin), float(yMax))
 		
 		# plot using XMGrace
 		if flagBS:

@@ -157,7 +157,7 @@ class Grace (object):
 		self.subtitle = ""
 		self.font = "optima"
 	
-	def setYaxis (self, yMax, yMin):
+	def setYaxis (self, yMin, yMax):
 		self.yMax = yMax
 		self.yMin = yMin
 	
