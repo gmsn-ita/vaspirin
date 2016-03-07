@@ -6,6 +6,14 @@ from setuptools import setup
 setup (
 	name='vaspirin',
 	packages=['vaspirin'],
+	
+	requires = [
+	'matplotlib',
+	'numpy',
+	'scipy',
+	'pylab',
+	'itertools',
+	],
 	entry_points = {
         "console_scripts": ['vaspirin = vaspirin.vaspirin:main']
         },
