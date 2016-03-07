@@ -89,21 +89,25 @@ def testFlag2args(tag, default1, default2, args):
 
 	return [flag, attribute1, attribute2]
 
-
-def main():
-	
-	###########################################     CODE     #######################################################
+def hello ():
 	print ('\n**************************************************')
 	print ('WELCOME TO VASPIRIN.PY')
 	print ('**************************************************\n')
-
-
 
 	print ('Made by: I. Guilhon and D. S. Koda.')
 	print ('Group of Semiconductor Materials and Nanotechnology')
 	print ('Instituto Tecnológico de Aeronáutica')
 	print ('http://www.gmsn.ita.br/?q=en')
 	print ('STARTING LOG...')
+
+def main():
+	
+	###########################################     CODE     #######################################################
+	
+	[flagQUIET, quietPostArgument] = testFlag('-quiet', '', sys.argv)
+	if not flagQUIET:
+		hello()
+		
 
 	###################################     IDENTIFICATING TASKS        #########################################
 	'''
