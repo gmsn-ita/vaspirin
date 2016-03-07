@@ -150,8 +150,7 @@ def main():
 
 
 	# PROJ FLAG
-	[flagPROJ,PROCARfile] = testFlag('-proj', 'PROCAR',sys.argv)
-	[flagPROJFILE,PROJECTIONfile] = testFlag('-projfile', 'PROJECTION',sys.argv)
+	[flagPROJ,PROCARfile,PROJECTIONfile] = testFlag2args('-proj', 'PROCAR', 'PROJECTION',sys.argv)
 	
 	if flagPROJ and not(flagFROMDAT):
 		print ('Projection on atomic orbitals info extracted from:', PROCARfile)
