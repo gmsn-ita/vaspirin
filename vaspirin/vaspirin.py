@@ -191,7 +191,7 @@ def main():
 		[flagYAXIS, yMin, yMax] = testFlag2args ('-yaxis', -3, 3, sys.argv)
 
 		if flagYAXIS:
-			plt.setYaxis (float(yMin), float(yMax))
+			plt.setYaxis (min(float(yMin), float(yMax)), max(float(yMin), float(yMax)))
 		
 		# plot using XMGrace
 		if flagBS:
