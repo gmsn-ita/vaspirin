@@ -9,7 +9,14 @@ class DatFiles (object):
 	
 	def __init__ (self, markerSize):
 		self.markerSize = markerSize
-		
+		self.flagINTERPOLATE = 0
+		self.pointsInterpolate = 0
+	
+	def setInterpolateOptions (self, flag, numberPoints):
+		self.flagInterpolate = flag
+		self.pointsInterpolate = numberPoints
+	
+	
 	'''
 	Creates the eigenv.dat file
 	Format:
@@ -19,8 +26,13 @@ class DatFiles (object):
 	def datEigenvals (self, bandStructure):
 		with open ("eigenv.dat",'w') as outputFile:
 			for band in range(bandStructure.nBands):
-				for kpoint in range(len(bandStructure.xAxis)):
-					outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+				for kpoint in range(1, len(bandStructure.xAxis)):
+					if self.flagInterpolate:
+						for interpol_kpt in range (self.pointsInterpolate):
+							t = (interpol_kpt)/(self.pointsInterpolate+1)
+							outputFile.write ("%.6f % 3.6f\n" % (((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint]), ((1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band]) - bandStructure.reference))
+					else:
+						outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
 				outputFile.write ("\n")
 	
 	'''
@@ -42,9 +54,7 @@ class DatFiles (object):
 	The markerSize variable scales the size of the marker plotted
 	'''
 	def datCharacter (self, bandStructure, bandCharacter):
-		if self.markerSize <= 0:
-			self.markerSize = 0.5
-			
+
 		try:
 			os.mkdir ('bands_character')
 		except:
@@ -53,11 +63,23 @@ class DatFiles (object):
 			
 		for band in range(bandStructure.nBands):
 			with open ("bands_character/band%02d.dat" % int(band+1),'w') as outputFile:
-				for kpoint in range(len(bandStructure.xAxis)):
-					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
-					for contrib in bandCharacter.orbitalContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
-					outputFile.write ("\n")
+				for kpoint in range(1, len(bandStructure.xAxis)):
+					if self.flagInterpolate:
+						for interpol_kpt in range (self.pointsInterpolate):
+							t = (interpol_kpt)/(self.pointsInterpolate+1)
+							
+							outputFile.write ("%.6f % 3.6f" % ((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint], (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+							
+							for i in range(len(bandCharacter.orbitalContributions[kpoint][band])):
+								outputFile.write(" %1.4f" % ((1-t)*float(bandCharacter.orbitalContributions[kpoint-1][band][i] + t*float(bandCharacter.orbitalContributions[kpoint][band][i]))*float(self.markerSize)))
+							outputFile.write ("\n")
+
+					else:			
+						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+						for contrib in bandCharacter.orbitalContributions[kpoint][band]:
+							outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))	
+						outputFile.write ("\n")
+						
 				outputFile.write ("\n")
 		
 	'''
@@ -86,11 +108,22 @@ class DatFiles (object):
 			
 		for band in range(bandStructure.nBands):
 			with open ("bands_projected/band%02d.dat" % int(band+1),'w') as outputFile:
-				for kpoint in range(len(bandStructure.xAxis)):
-					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
-					for contrib in bandCharacter.materialContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
-					outputFile.write ("\n")
+				for kpoint in range(1, len(bandStructure.xAxis)):
+					if self.flagInterpolate:
+						for interpol_kpt in range (self.pointsInterpolate):
+							t = (interpol_kpt)/(self.pointsInterpolate+1)
+							
+							outputFile.write ("%.6f % 3.6f" % ((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint], (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+					
+							for i in range(len(bandCharacter.materialContributions[kpoint][band])):
+								outputFile.write(" %1.4f" % ((1-t)*float(bandCharacter.materialContributions[kpoint-1][band][i] + t*float(bandCharacter.materialContributions[kpoint][band][i]))*float(self.markerSize)))
+							outputFile.write ("\n")
+								
+					else:
+						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+						for contrib in bandCharacter.materialContributions[kpoint][band]:
+							outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
+						outputFile.write ("\n")
 				outputFile.write ("\n")
 				
 				

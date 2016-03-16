@@ -63,29 +63,34 @@ def testFlag2args(tag, default1, default2, args):
 		flag=True
 		index= (sys.argv).index(tag)
 		
+		isThereAnyArgument = False
 		# Try to read the first attribute
 		try:
 			newName1 = sys.argv[index + 1]
 			if  newName1[0] != '-':
 				attribute1 = newName1
+				isThereAnyArgument = True
 			elif newName1[1].isnumeric():
 				attribute1 = newName1
+				isThereAnyArgument = True
 				
 		# If the reading fails, returns to the default value
 		except (IOError,IndexError,RuntimeError, TypeError, NameError):
 			attribute1 = default1
+			isThereAnyArgument = False
 		
-		# Try to read the second attribute
-		try:
-			newName2 = sys.argv[index + 2]
-			if  newName2[0] != '-':
-				attribute2 = newName2
-			elif newName2[1].isnumeric():
-				attribute2 = newName2
-				
-		# If the reading fails, returns to the default value
-		except (IOError,IndexError,RuntimeError, TypeError, NameError):
-			attribute2 = default2	
+		if isThereAnyArgument:
+			# Try to read the second attribute
+			try:
+				newName2 = sys.argv[index + 2]
+				if  newName2[0] != '-':
+					attribute2 = newName2
+				elif newName2[1].isnumeric():
+					attribute2 = newName2
+					
+			# If the reading fails, returns to the default value
+			except (IOError,IndexError,RuntimeError, TypeError, NameError):
+				attribute2 = default2	
 
 	return [flag, attribute1, attribute2]
 
@@ -183,7 +188,19 @@ def main():
 			print ('Invalid -markersize argument. Please input a float number. Using 0.5 as default...')
 			markerSize = 0.5
 		
+		[flagINTERPOLATE, interpolateArgument] = testFlag('-interpolate', '', sys.argv)
+		
+		if flagINTERPOLATE:
+			try:
+				interpolateArgument = int (interpolateArgument)
+				if interpolateArgument <= 0:
+					raise ValueError ('Negative number of points')
+			except ValueError:
+				print ('Invalid -interpolate argument. Please input an integer number. Using 0 as default...')
+				interpolateArgument = 0
+			
 		dat = plotter.DatFiles (markerSize)
+		dat.setInterpolateOptions (flagINTERPOLATE, interpolateArgument)
 		plt = plotter.Grace ()
 		
 		
