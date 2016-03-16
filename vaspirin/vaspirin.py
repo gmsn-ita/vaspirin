@@ -94,9 +94,9 @@ def hello ():
 	print ('WELCOME TO VASPIRIN.PY')
 	print ('**************************************************\n')
 
-	print ('Made by: I. Guilhon and D. S. Koda.')
+	print ('Made by Daniel S. Koda and Ivan Guilhon.')
 	print ('Group of Semiconductor Materials and Nanotechnology')
-	print ('Instituto Tecnológico de Aeronáutica')
+	print ('Instituto Tecnologico de Aeronautica')
 	print ('http://www.gmsn.ita.br/?q=en')
 	print ('STARTING LOG...')
 
@@ -110,16 +110,6 @@ def main():
 		
 
 	###################################     IDENTIFICATING TASKS        #########################################
-	'''
-	List of useful flags:
-	flagFROMDAT= sets from dat
-	flagBS=
-	flagDOS=
-	flagCHAR=
-	flagPROJ=
-	flagPLOT=
-	'''
-
 
 	# fromdat FLAG
 	[flagFROMDAT,DATFile] = testFlag('-fromdat', 'input.dat',sys.argv)
