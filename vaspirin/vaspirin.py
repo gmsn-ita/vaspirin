@@ -131,21 +131,21 @@ def main():
 	# BANDSTRUCTURE FLAG
 	[flagBS,OUTCARfile] = testFlag('-bs', 'OUTCAR',sys.argv)
 	if flagBS and not(flagFROMDAT):
-		print ('OUTCAR info extracted from:', OUTCARfile)
+		print ('OUTCAR info extracted from: ' + OUTCARfile)
 		bsData=bandstructure.BandStructure(OUTCARfile)
 
 
 	# DOS FLAG	
 	[flagDOS,DOSCARfile] = testFlag('-dos', 'DOSCAR',sys.argv)
 	if flagDOS and not(flagFROMDAT):
-		print ('DOSCAR info extracted from:', DOSCARfile)
+		print ('DOSCAR info extracted from: ' + DOSCARfile)
 		dosData=dos.DOS(DOSCARfile)
 
 
 	# CHAR FLAG
 	[flagCHAR,PROCARfile] = testFlag('-char', 'PROCAR',sys.argv)
 	if flagCHAR and not(flagFROMDAT):
-		print ('Band Character info extracted from:', PROCARfile)
+		print ('Band Character info extracted from: ' + PROCARfile)
 		procarData=bandcharacter.PROCAR(PROCARfile)
 
 
@@ -153,7 +153,7 @@ def main():
 	[flagPROJ,PROCARfile,PROJECTIONfile] = testFlag2args('-proj', 'PROCAR', 'PROJECTION',sys.argv)
 	
 	if flagPROJ and not(flagFROMDAT):
-		print ('Projection on atomic orbitals info extracted from:', PROCARfile)
+		print ('Projection on atomic orbitals info extracted from: ' + PROCARfile)
 		
 		projData = bandcharacter.PROCAR (PROCARfile)
 		
