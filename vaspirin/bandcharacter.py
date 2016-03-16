@@ -12,7 +12,8 @@ class PROCAR (object):
 	 -> Seek contributions of each ion for each band and k-point
 	'''
 
-	def __init__ (self, fProcar):
+	def __init__ (self, fProcar, nKPTignore):
+		self.nKPTignore = nKPTignore
 		self.nBands = self.readNbands (fProcar)
 		self.nKpoints = self.readNkpoints (fProcar)
 		self.nIons = self.readNions (fProcar)
@@ -59,11 +60,11 @@ class PROCAR (object):
 		
 		kptBlock = procar.split('k-point')
 		
-		for k in range (2,len(kptBlock)):
+		for k in range (2 + self.nKPTignore,len(kptBlock)):
 			contributions.append([])
 			bands = kptBlock[k].split('band')
 			for j in range (1,self.nBands+1):
-				contributions[k-2].append([])
+				contributions[k-self.nKPTignore-2].append([])
 				lines = bands[j].split('\n')
 				
 				totCont = float(lines[3+self.nIons].split()[10])
@@ -78,9 +79,9 @@ class PROCAR (object):
 					dz2Cont = float(lines[3+self.nIons].split()[7])/totCont
 					dxzCont = float(lines[3+self.nIons].split()[8])/totCont
 					dx2Cont = float(lines[3+self.nIons].split()[9])/totCont
-					contributions[k-2][j-1].extend([sCont, pyCont + pxCont, pzCont, dxyCont + dyzCont + dz2Cont + dxzCont + dx2Cont])
+					contributions[k-self.nKPTignore-2][j-1].extend([sCont, pyCont + pxCont, pzCont, dxyCont + dyzCont + dz2Cont + dxzCont + dx2Cont])
 				else:
-					contributions[k-2][j-1].extend([0,0,0,0])
+					contributions[k-self.nKPTignore-2][j-1].extend([0,0,0,0])
 		
 		fileIn.close()        
 		
@@ -96,11 +97,11 @@ class PROCAR (object):
 		
 		kptBlock = procar.split('k-point')
 		
-		for k in range (2,len(kptBlock)):
+		for k in range (2 + self.nKPTignore,len(kptBlock)):
 			contributions.append([])
 			bands = kptBlock[k].split('band')
 			for j in range (1,self.nBands+1):
-				contributions[k-2].append([])
+				contributions[k-self.nKPTignore-2].append([])
 				lines = bands[j].split('\n')
 				
 				totCont = float(lines[3+self.nIons].split()[10])
@@ -110,9 +111,9 @@ class PROCAR (object):
 					for i in range(self.nIons):
 						ionContributionThisBand.append(float(lines[3+i].split()[10])/totCont)
 
-					contributions[k-2][j-1].extend(ionContributionThisBand)
+					contributions[k-self.nKPTignore-2][j-1].extend(ionContributionThisBand)
 				else:
-					contributions[k-2][j-1].extend([0]*self.nIons)
+					contributions[k-self.nKPTignore-2][j-1].extend([0]*self.nIons)
 		
 		fileIn.close()        
 		
@@ -122,7 +123,7 @@ class PROCAR (object):
 	def sumContributions (self):
 
 		projectedContributions = []
-		for kpt in range(self.nKpoints):
+		for kpt in range(self.nKpoints - self.nKPTignore):
 			projectedContributions.append ([])
 			
 			for band in range (self.nBands):

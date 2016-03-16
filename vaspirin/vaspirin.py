@@ -110,19 +110,28 @@ def main():
 		
 
 	###################################     IDENTIFICATING TASKS        #########################################
-
+	
+	# do not plot the first N k-points if '-ignore N' is given
+	[flagIGNORE, nKPTignore] = testFlag('-ignore', 0, sys.argv)
+	
+	try:
+		nKPTignore = int (nKPTignore)
+	except ValueError:
+		print ('Invalid -ignore argument. Please input an integer number. Using 0 as default...')
+		nKPTignore = 0
+	
 	# fromdat FLAG
 	[flagFROMDAT,DATFile] = testFlag('-fromdat', 'input.dat',sys.argv)
 	if flagFROMDAT:
 		print ('Info extracted from file:', DATFile)
 		#Read dat file
 
-
+	
 	# BANDSTRUCTURE FLAG
 	[flagBS,OUTCARfile] = testFlag('-bs', 'OUTCAR',sys.argv)
 	if flagBS and not(flagFROMDAT):
 		print ('OUTCAR info extracted from: ' + OUTCARfile)
-		bsData=bandstructure.BandStructure(OUTCARfile)
+		bsData=bandstructure.BandStructure(OUTCARfile, nKPTignore)
 
 
 	# DOS FLAG	
@@ -136,7 +145,7 @@ def main():
 	[flagCHAR,PROCARfile] = testFlag('-char', 'PROCAR',sys.argv)
 	if flagCHAR and not(flagFROMDAT):
 		print ('Band Character info extracted from: ' + PROCARfile)
-		procarData=bandcharacter.PROCAR(PROCARfile)
+		procarData=bandcharacter.PROCAR(PROCARfile, nKPTignore)
 
 
 	# PROJ FLAG
@@ -145,7 +154,7 @@ def main():
 	if flagPROJ and not(flagFROMDAT):
 		print ('Projection on atomic orbitals info extracted from: ' + PROCARfile)
 		
-		projData = bandcharacter.PROCAR (PROCARfile)
+		projData = bandcharacter.PROCAR (PROCARfile, nKPTignore)
 		
 		# Opens the file 'PROJECTION' if the argument -projdata is not specified
 		projData.createIonVsMaterials (PROJECTIONfile)
@@ -158,7 +167,7 @@ def main():
 
 
 	###################################     MAKING OUTPUTS        #########################################
-
+	
 	# PLOT FLAG
 	[flagPLOT,figureName] = testFlag('-plot', 'figure',sys.argv)
 	if flagPLOT:

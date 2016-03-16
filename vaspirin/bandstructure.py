@@ -12,15 +12,16 @@ class BandStructure (object):
 	'''
 	
 	# Import all properties related to band structures
-	def __init__(self,fOutcar):
-		self.path = self.readPath(fOutcar)
-		self.nBands = self.readNbands(fOutcar)
-		self.recLattice = self.readRecLattice(fOutcar)
-		self.eigenvals = self.readEigenvals(fOutcar)
-		self.eFermi = self.readEFermi(fOutcar)
-		self.nElec = self.readNElec(fOutcar)
+	def __init__(self,fOutcar, nKPTignore):
+		self.nKPTignore = nKPTignore
+		self.path = self.readPath (fOutcar)
+		self.nBands = self.readNbands (fOutcar)
+		self.recLattice = self.readRecLattice (fOutcar)
+		self.eigenvals = self.readEigenvals (fOutcar)
+		self.eFermi = self.readEFermi (fOutcar)
+		self.nElec = self.readNElec (fOutcar)
 		self.eValence = self.readEValence()
-		self.xAxis = self.createXaxis()
+		self.xAxis = self.createXaxis ()
 		self.reference = self.eValence
 	
 	'''
@@ -104,12 +105,13 @@ class BandStructure (object):
 		text=outcar.split('k-points in reciprocal lattice and weights:')[1].split('position of ions in fractional coordinates')[0] 
 		#l487	
 		lines=text.split('\n')
-		for k in range(len(lines)):
+		for k in range(self.nKPTignore + 1, len(lines)):
 			dados=lines[k].split()
 			if len(dados)==4:
 				kpoints.append([float(dados[0]),float(dados[1]),float(dados[2])])
 
 		fileIn.close()
+		
 		return  kpoints 
 	
 	# recLattice = [b1,b2,b3]
@@ -146,16 +148,18 @@ class BandStructure (object):
 		eigenvals=[]
 		txtBlock=outcar.split('E-fermi :')[-1].split('---------------------------')[0]
 		kpoints=txtBlock.split('band No.  band energies     occupation')
-
+		
+		
 		# Obtaining the eigenvalues from OUTCAR
-		for k in range(1,len(kpoints)):
+		for k in range(self.nKPTignore + 1,len(kpoints)):
 			eigenvals.append([])
 			lines=kpoints[k].split('\n')
 			for i in lines:
 				data=i.split()
 				if len(data)==3:
-					eigenvals[k-1].append(float(data[1]))		
+					eigenvals[k-self.nKPTignore-1].append(float(data[1]))		
 		fileIn.close()
+		
 		return  eigenvals 
 
 	# nBands = total number of bands
