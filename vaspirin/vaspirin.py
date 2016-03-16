@@ -171,11 +171,21 @@ def main():
 	# PLOT FLAG
 	[flagPLOT,figureName] = testFlag('-plot', 'figure',sys.argv)
 	if flagPLOT:
-		dat = plotter.DatFiles ()
+		
+		# Load marker size for the plotter
+		[flagMARKER, markerSize] = testFlag('-markersize', 0.5, sys.argv)
+		
+		try:
+			markerSize = float (markerSize)
+			if markerSize <= 0:
+				raise ValueError ('Negative marker size')
+		except ValueError:
+			print ('Invalid -markersize argument. Please input a float number. Using 0.5 as default...')
+			markerSize = 0.5
+		
+		dat = plotter.DatFiles (markerSize)
 		plt = plotter.Grace ()
 		
-		# Optional argument: markerSize tunes the size of the marker on projected band structures
-		markerSize = -1
 		
 		# Yet to implement: export PDF to figureName
 		print ('Printing results on:', figureName, '\n')
@@ -199,12 +209,12 @@ def main():
 				# Print DOS with bands
 			
 			elif flagCHAR:
-				dat.datCharacter (bsData, procarData, markerSize)
+				dat.datCharacter (bsData, procarData)
 				plt.printBandCharacter (bsData)
 				print ("Print the results using XMgrace\n $ xmgrace -batch bandsCharacter.bfile")
 				
 			elif flagPROJ:
-				dat.datProjected (bsData, projData, markerSize)
+				dat.datProjected (bsData, projData)
 				plt.printBandProjected (bsData, projData)
 				print ("Print the results using XMgrace\n $ xmgrace -batch bandsProjected.bfile")
 			else:

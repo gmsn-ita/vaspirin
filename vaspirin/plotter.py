@@ -7,12 +7,9 @@ class DatFiles (object):
 	The files are generated in the current directory
 	'''
 	
-	'''
-	Set default reference for the eigenvalues
-	
-	def __init__ (self):
-	'''
-	
+	def __init__ (self, markerSize):
+		self.markerSize = markerSize
+		
 	'''
 	Creates the eigenv.dat file
 	Format:
@@ -44,9 +41,9 @@ class DatFiles (object):
 	
 	The markerSize variable scales the size of the marker plotted
 	'''
-	def datCharacter (self, bandStructure, bandCharacter, markerSize):
-		if markerSize <= 0:
-			markerSize = 0.5
+	def datCharacter (self, bandStructure, bandCharacter):
+		if self.markerSize <= 0:
+			self.markerSize = 0.5
 			
 		try:
 			os.mkdir ('bands_character')
@@ -59,7 +56,7 @@ class DatFiles (object):
 				for kpoint in range(len(bandStructure.xAxis)):
 					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
 					for contrib in bandCharacter.orbitalContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % (float(contrib)*float(markerSize)))
+						outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
 					outputFile.write ("\n")
 				outputFile.write ("\n")
 		
@@ -77,9 +74,9 @@ class DatFiles (object):
 	
 	The markerSize variable scales the size of the marker plotted
 	'''
-	def datProjected (self, bandStructure, bandCharacter, markerSize):
-		if markerSize <= 0:
-			markerSize = 0.5
+	def datProjected (self, bandStructure, bandCharacter):
+		if self.markerSize <= 0:
+			self.markerSize = 0.5
 			
 		try:
 			os.mkdir ('bands_projected')
@@ -92,7 +89,7 @@ class DatFiles (object):
 				for kpoint in range(len(bandStructure.xAxis)):
 					outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
 					for contrib in bandCharacter.materialContributions[kpoint][band]:
-						outputFile.write(" %1.4f" % (float(contrib)*float(markerSize)))
+						outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
 					outputFile.write ("\n")
 				outputFile.write ("\n")
 				
