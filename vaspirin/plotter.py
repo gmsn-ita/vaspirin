@@ -230,9 +230,8 @@ class Grace (object):
 				self.xTicks[tickIndex][0] = "\\xG\\0"
 			
 			try:
-				if int(self.xTicks[tickIndex][1]) - bands.nKPTignore >= 0:
-					outputFile.write ("xaxis  tick major %d, %.6f\n" % (tickIndex, bands.xAxis[int(self.xTicks[tickIndex][1]) - bands.nKPTignore]))
-					outputFile.write ("xaxis  ticklabel %d, \"%s\"\n" % (tickIndex, self.xTicks[tickIndex][0]))
+				outputFile.write ("xaxis  tick major %d, %.6f\n" % (tickIndex, bands.xAxis[int(self.xTicks[tickIndex][1])]))
+				outputFile.write ("xaxis  ticklabel %d, \"%s\"\n" % (tickIndex, self.xTicks[tickIndex][0]))
 			except IndexError:
 				print ('Symmetry point ' + self.xTicks[tickIndex][0] + ' specified as k-point ' + self.xTicks[tickIndex][1] + ' is out of range. Please specify valid k-points.')
 
