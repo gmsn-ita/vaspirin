@@ -32,7 +32,10 @@ class DatFiles (object):
 							t = (interpol_kpt)/(self.pointsInterpolate+1)
 							outputFile.write ("%.6f % 3.6f\n" % (((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint]), ((1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band]) - bandStructure.reference))
 					else:
-						outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+						outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[kpoint-1], bandStructure.eigenvals[kpoint-1][band] - bandStructure.reference))
+				
+				outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[len(bandStructure.xAxis)-1], bandStructure.eigenvals[len(bandStructure.xAxis)-1][band] - bandStructure.reference))
+				
 				outputFile.write ("\n")
 	
 	'''
@@ -75,11 +78,17 @@ class DatFiles (object):
 							outputFile.write ("\n")
 
 					else:			
-						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
-						for contrib in bandCharacter.orbitalContributions[kpoint][band]:
+						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint-1], bandStructure.eigenvals[kpoint-1][band] - bandStructure.reference))
+						for contrib in bandCharacter.orbitalContributions[kpoint-1][band]:
 							outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))	
 						outputFile.write ("\n")
-						
+				
+				# Print last k-point
+				outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[len(bandStructure.xAxis)-1], bandStructure.eigenvals[len(bandStructure.xAxis)-1][band] - bandStructure.reference))
+				for contrib in bandCharacter.orbitalContributions[len(bandStructure.xAxis)-1][band]:
+					outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
+				outputFile.write ("\n")
+									
 				outputFile.write ("\n")
 		
 	'''
@@ -120,10 +129,17 @@ class DatFiles (object):
 							outputFile.write ("\n")
 								
 					else:
-						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint], bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
-						for contrib in bandCharacter.materialContributions[kpoint][band]:
+						outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[kpoint-1], bandStructure.eigenvals[kpoint-1][band] - bandStructure.reference))
+						for contrib in bandCharacter.materialContributions[kpoint-1][band]:
 							outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
 						outputFile.write ("\n")
+				
+				# Print last k-point
+				outputFile.write ("%.6f % 3.6f" % (bandStructure.xAxis[len(bandStructure.xAxis)-1], bandStructure.eigenvals[len(bandStructure.xAxis)-1][band] - bandStructure.reference))
+				for contrib in bandCharacter.materialContributions[len(bandStructure.xAxis)-1][band]:
+					outputFile.write(" %1.4f" % (float(contrib)*float(self.markerSize)))
+				outputFile.write ("\n")
+						
 				outputFile.write ("\n")
 				
 				

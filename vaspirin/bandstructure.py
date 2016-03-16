@@ -109,7 +109,7 @@ class BandStructure (object):
 			dados=lines[k].split()
 			if len(dados)==4:
 				kpoints.append([float(dados[0]),float(dados[1]),float(dados[2])])
-
+		
 		fileIn.close()
 		
 		return  kpoints 
