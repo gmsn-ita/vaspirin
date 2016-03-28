@@ -179,7 +179,12 @@ class PROCAR (object):
 	 The label should not contain spaces
 	''' 
 	def createIonVsMaterials (self, fileProjection):
-		fileIn=open(fileProjection,'r')
+		try:
+			fileIn=open(fileProjection,'r')
+		except FileNotFoundError:
+			print ('Projection file not found. Please specify a valid filename.')
+			sys.exit()
+			
 		ionsData = fileIn.read()
 		
 		matString = ionsData.split('\n')

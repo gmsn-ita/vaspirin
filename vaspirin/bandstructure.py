@@ -30,6 +30,15 @@ class BandStructure (object):
 	def setReference (self, newRef):
 		self.reference = newRef
 
+	def setReferenceString (self, stringRef):
+		referenceDict = {
+			'vbm' : self.eValence,
+			'efermi' : self.eFermi,
+			'e-fermi' : self.eFermi
+		}
+		
+		self.setReference (referenceDict.get(stringRef.lower(), self.eValence))
+		
 	# nElec = total number of electrons in the cell
 	def readNElec(self,fOutcar):
 		fileIn=open(fOutcar,'r')

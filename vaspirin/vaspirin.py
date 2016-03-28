@@ -104,7 +104,7 @@ def hello ():
 	print ('Instituto Tecnologico de Aeronautica')
 	print ('http://www.gmsn.ita.br/?q=en')
 	print ('STARTING LOG...')
-
+	
 def main():
 	
 	###########################################     CODE     #######################################################
@@ -218,6 +218,12 @@ def main():
 
 		if flagYAXIS:
 			plt.setYaxis (min(float(yMin), float(yMax)), max(float(yMin), float(yMax)))
+		
+		# Read the reference for the band structure
+		[flagREFERENCE, referenceArgument] = testFlag('-ref', 'vbm', sys.argv)
+		
+		if flagREFERENCE:
+			bsData.setReferenceString (referenceArgument)
 		
 		# plot using XMGrace
 		if flagBS:
