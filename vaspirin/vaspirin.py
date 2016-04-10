@@ -203,9 +203,14 @@ def main():
 		dat.setInterpolateOptions (flagINTERPOLATE, interpolateArgument)
 		plt = plotter.Grace ()
 		
+		[flagExportPS, psFilename] = testFlag('-ps', 'bands',sys.argv)
+		
+		plt.exportPS = flagExportPS
+		plt.psFilename = psFilename
+		
 		
 		# Yet to implement: export PDF to figureName
-		print ('Printing results on:', figureName, '\n')
+		print ('Printing results on:', psFilename, '\n')
 		
 		# Reading the KPOINTS file:
 		try:
@@ -234,20 +239,21 @@ def main():
 			elif flagCHAR:
 				dat.datCharacter (bsData, procarData)
 				plt.printBandCharacter (bsData)
-				print ("Print the results using XMgrace\n $ xmgrace -batch bandsCharacter.bfile")
+				print ("Print the results using XMgrace\n xmgrace -batch bandsCharacter.bfile")
 				
 			elif flagPROJ:
 				dat.datProjected (bsData, projData)
 				plt.printBandProjected (bsData, projData)
-				print ("Print the results using XMgrace\n $ xmgrace -batch bandsProjected.bfile")
+				print ("Print the results using XMgrace\n xmgrace -batch bandsProjected.bfile")
 			else:
 				dat.datEigenvals (bsData)
 				plt.printBandStructure (bsData)
-				print ("Print the results using XMgrace\n $ xmgrace -batch bands.bfile")
+				print ("Print the results using XMgrace\n xmgrace -batch bands.bfile")
 		else:
 			if flagDOS:
 				print ("Feature not yet implemented. Feel free to work on it if you want!")
 		
+		print ("(add -hardcopy -nosafe to the xmgrace command if you want to print it directly)")
 
 	# PYPLOT FLAG
 	[flagPLOT,figureName] = testFlag('-pyplot', 'figure',sys.argv)

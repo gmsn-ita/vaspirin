@@ -202,6 +202,8 @@ class Grace (object):
 		self.title = ""
 		self.subtitle = ""
 		self.font = "optima"
+		self.exportPS = 0
+		self.psFilename = 'bands'
 	
 	def setYaxis (self, yMin, yMax):
 		self.yMax = yMax
@@ -378,7 +380,8 @@ class Grace (object):
 			self.printTraces (outputFile, bands)
 			self.printLabel (outputFile)
 			
-			#self.printExportPS (outputFile, 'bands')
+			if self.exportPS:
+				self.printExportPS (outputFile, self.psFilename)
 	
 	'''
 	Prints a .bfile for a band structure with character
@@ -396,7 +399,8 @@ class Grace (object):
 			self.printAxis (outputFile, bands)
 			self.printLabel (outputFile)
 			
-			#self.printExportPS (outputFile, 'bandsOrbitals')
+			if self.exportPS:
+				self.printExportPS (outputFile, self.psFilename)
 	
 	'''
 	Prints a .bfile for a band structure projected onto the specified materials (file PROJECTION)
@@ -413,4 +417,5 @@ class Grace (object):
 			self.printAxis (outputFile, bands)			
 			self.printLabel (outputFile)
 			
-			#self.printExportPS (outputFile, 'bandsProjected')
+			if self.exportPS:
+				self.printExportPS (outputFile, self.psFilename)
