@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 class BandStructure (object):
 	'''
@@ -41,12 +42,18 @@ class BandStructure (object):
 		
 	# nElec = total number of electrons in the cell
 	def readNElec(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 		nElec=int(float(outcar.split('NELECT =')[1].split('total number of electrons')[0]))
 		fileIn.close()
 		return  nElec 
-
+		
+			
 	# return the fundamental gap
 	def gap(self):
 		nval=self.nElec/2
@@ -98,16 +105,26 @@ class BandStructure (object):
 
 	# eFermi = x.xxxx eV
 	def readEFermi(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 		ef=float(outcar.split('E-fermi :')[1].split('XC(G=0):')[0])#l1621
 		fileIn.close()
 		return  ef 	
-
+		
 
 	# path = [k-point 1, k-point 2, ...]
 	def readPath(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 
 		kpoints=[]	
@@ -122,11 +139,18 @@ class BandStructure (object):
 		fileIn.close()
 		
 		return  kpoints 
+			
+		
 	
 	# recLattice = [b1,b2,b3]
 	# b1 = [b1_x, b1_y, b1_z]
 	def readRecLattice(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 
 		lines=outcar.split('reciprocal lattice vectors')[1].split('length of vectors')[0].split('\n') #linha 432
@@ -148,10 +172,16 @@ class BandStructure (object):
 
 		fileIn.close()
 		return  [b1,b2,b3] 
+		
 
 	# eigenval[k-point][band]
 	def readEigenvals(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 
 		eigenvals=[]
@@ -169,16 +199,24 @@ class BandStructure (object):
 					eigenvals[k-self.nKPTignore-1].append(float(data[1]))		
 		fileIn.close()
 		
-		return  eigenvals 
+		return  eigenvals
+			
+		
 
 	# nBands = total number of bands
 	def readNbands(self,fOutcar):
-		fileIn=open(fOutcar,'r')
+		try:
+			fileIn=open(fOutcar,'r')
+		except FileNotFoundError:
+			print ("OUTCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		outcar=fileIn.read()
 		nbands=int(float(outcar.split('NBANDS=')[1].split('number of dos')[0])) #l256
 		fileIn.close()
 		return  nbands 
-
+		
+		
 '''
 Auxiliary functions
 '''

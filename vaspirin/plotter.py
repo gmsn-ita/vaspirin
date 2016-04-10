@@ -60,7 +60,7 @@ class DatFiles (object):
 
 		try:
 			os.mkdir ('bands_character')
-		except:
+		except FileExistsError:
 			shutil.rmtree ('bands_character')
 			os.mkdir ('bands_character')
 			
@@ -111,7 +111,7 @@ class DatFiles (object):
 			
 		try:
 			os.mkdir ('bands_projected')
-		except:
+		except FileExistsError:
 			shutil.rmtree ('bands_projected')
 			os.mkdir ('bands_projected')
 			
@@ -219,13 +219,18 @@ class Grace (object):
 	'''
 	def readXticks (self, fKpoints):
 		ticks = []
-		with open (fKpoints, 'r') as fileIn:
-			firstLine = fileIn.readline()
-			symKpt = firstLine.strip('\n').split(',')
-			for eachKpt in symKpt:
-				l = eachKpt.split(' ')
-				l = [i for i in l if i] # strips whitespace
-				ticks.append ([l[0], l[1]])
+		try:
+			with open (fKpoints, 'r') as fileIn:
+				firstLine = fileIn.readline()
+				symKpt = firstLine.strip('\n').split(',')
+				for eachKpt in symKpt:
+					l = eachKpt.split(' ')
+					l = [i for i in l if i] # strips whitespace
+					ticks.append ([l[0], l[1]])
+					
+		except FileNotFoundError:
+			print ("KPOINTS file not found! Exiting...\n")
+			sys.exit (1)
 		
 		self.setXticks (ticks)
 		

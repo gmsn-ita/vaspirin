@@ -25,37 +25,60 @@ class PROCAR (object):
 	
 	# Returns the number of bands used in the simulation	
 	def readNbands (self,fProcar):
-		fileIn=open(fProcar,'r')
-        
+		try:
+			fileIn=open(fProcar,'r')
+		except FileNotFoundError:
+			print ("PROCAR file not found! Exiting...\n")
+			sys.exit (1)
+		
 		nBands = int(fileIn.read().split('\n')[1].split(':')[2].split()[0])
-        
+		
 		fileIn.close()        
 		return nBands
-	
+			
+		
+			
 	# Returns the number of k-points used in the simulation
 	def readNkpoints (self,fProcar):
-		fileIn=open(fProcar,'r')
-        
+		try:
+			fileIn=open(fProcar,'r')
+		except FileNotFoundError:
+			print ("PROCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		Nkpoints = int(fileIn.read().split('\n')[1].split(':')[1].split()[0])
-        
+		
 		fileIn.close()        
 		return Nkpoints
-	
+			
+		
+			
 	# Returns the number of ions used in the simulation	
 	def readNions (self,fProcar):
-		fileIn=open(fProcar,'r')
-        
+		try:
+			fileIn=open(fProcar,'r')
+		except FileNotFoundError:
+			print ("PROCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		nIons = int(fileIn.read().split('\n')[1].split(':')[3].split()[0])
-        
+		
 		fileIn.close()        
 		return nIons
-	
+			
+		
+			
 	# Creates a matrix containing the contribution of each orbital
 	def readOrbitalContribution (self,fProcar):
-		fileIn=open(fProcar,'r')
+		try:
+			fileIn=open(fProcar,'r')
+		except FileNotFoundError:
+			print ("PROCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		procar = fileIn.read()
-        
-        # contributions[kpoint][band] returns the list [s,px+py,pz,d]
+		
+		# contributions[kpoint][band] returns the list [s,px+py,pz,d]
 		contributions = []
 		
 		kptBlock = procar.split('k-point')
@@ -86,10 +109,15 @@ class PROCAR (object):
 		fileIn.close()        
 		
 		return contributions
-		
+			
 
 	def readIonContribution (self,fProcar):
-		fileIn=open(fProcar,'r')
+		try:
+			fileIn=open(fProcar,'r')
+		except FileNotFoundError:
+			print ("PROCAR file not found! Exiting...\n")
+			sys.exit (1)
+			
 		procar = fileIn.read()
 		
 		# contributions[k-point][band][ion]
@@ -118,6 +146,8 @@ class PROCAR (object):
 		fileIn.close()        
 		
 		return contributions
+			
+		
 	
 	# sum the contributions from the ions into N materials based on the list ionsVsMaterials
 	def sumContributions (self):
