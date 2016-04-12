@@ -234,9 +234,12 @@ def main():
 		# Read the reference for the band structure
 		[flagREFERENCE, referenceArgument] = testFlag('-ref', 'vbm', sys.argv)
 		
-		if flagREFERENCE:
+		if flagREFERENCE and flagBS:
 			bsData.setReferenceString (referenceArgument)
-		
+		elif flagREFERENCE and flagCOMPARE:
+			bsData1.setReferenceString (referenceArgument)
+			bsData2.setReferenceString (referenceArgument)
+			
 		# plot using XMGrace
 		if flagBS:
 			if flagDOS:
