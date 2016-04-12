@@ -138,6 +138,13 @@ def main():
 		print ('OUTCAR info extracted from: ' + OUTCARfile)
 		bsData=bandstructure.BandStructure(OUTCARfile, nKPTignore)
 
+	# Compare band structures FLAG
+	[flagCOMPARE, OUTCAR1, OUTCAR2] = testFlag2args ('-compare', 'OUTCAR1', 'OUTCAR2', sys.argv)
+	if flagCOMPARE and not(flagFROMDAT):
+		print ('Comparing ' + OUTCAR1 + ' with ' + OUTCAR2)
+		bsData1 = bandstructure.BandStructure(OUTCAR1, nKPTignore)
+		bsData2 = bandstructure.BandStructure(OUTCAR2, nKPTignore)
+
 
 	# DOS FLAG	
 	[flagDOS,DOSCARfile] = testFlag('-dos', 'DOSCAR',sys.argv)
@@ -216,7 +223,7 @@ def main():
 		try:
 			plt.readXticks (KPOINTSfile)
 		except:
-			print ("KPOINTS file not found. Plotting without k-points on the x axis...")
+			print ("Wrong header formatting in KPOINTS file. Plotting without k-points on the x axis...")
 		
 		# Read the y axis minimum and maximum values
 		[flagYAXIS, yMin, yMax] = testFlag2args ('-yaxis', -3, 3, sys.argv)
@@ -249,6 +256,13 @@ def main():
 				dat.datEigenvals (bsData)
 				plt.printBandStructure (bsData)
 				print ("Print the results using XMgrace\n xmgrace -batch bands.bfile")
+		
+		elif flagCOMPARE:
+				dat.datEigenvals (bsData1, datName='eigenv1.dat')
+				dat.datEigenvals (bsData2, datName='eigenv2.dat')
+				plt.printComparisonBands (bsData1, bsData2)
+				print ("Print the results using XMgrace\n xmgrace -batch bandsComparison.bfile")
+				
 		else:
 			if flagDOS:
 				print ("Feature not yet implemented. Feel free to work on it if you want!")

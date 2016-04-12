@@ -23,8 +23,8 @@ class DatFiles (object):
 	1st column) normalized k-point (from 0 to 1, derived from the path length)
 	2nd column) eigenvalue
 	'''
-	def datEigenvals (self, bandStructure):
-		with open ("eigenv.dat",'w') as outputFile:
+	def datEigenvals (self, bandStructure, datName='eigenv.dat'):
+		with open (datName,'w') as outputFile:
 			for band in range(bandStructure.nBands):
 				for kpoint in range(1, len(bandStructure.xAxis)):
 					if self.flagInterpolate:
@@ -289,11 +289,11 @@ class Grace (object):
 				print ('Symmetry point ' + self.xTicks[tickIndex][0] + ' specified as k-point ' + self.xTicks[tickIndex][1] + ' is out of range. Please specify valid k-points.')
 
 	# Configure the sets of data (bands)
-	def printTraces (self, outputFile, bands):
-		for eachBand in range(bands.nBands):
+	def printTraces (self, outputFile, bands, traceColor='black', firstBand=0):
+		for eachBand in range(firstBand, bands.nBands + firstBand):
 			outputFile.write ("s%d line linestyle 1\n" % eachBand)
 			outputFile.write ("s%d line linewidth 1.5\n" % eachBand)
-			outputFile.write ("s%d line color %d\n" % (eachBand, GraceConstants.colors.get('black')))
+			outputFile.write ("s%d line color %d\n" % (eachBand, GraceConstants.colors.get(traceColor)))
 			outputFile.write ("s%d comment \"Band %d\"\n" % (eachBand,eachBand))
 	
 	# Configure the bands with character
@@ -377,12 +377,33 @@ class Grace (object):
 			
 			self.printFontSection (outputFile)
 			self.printAxis (outputFile, bands)
-			self.printTraces (outputFile, bands)
+			self.printTraces (outputFile, bands, traceColor='black', firstBand=0)
 			self.printLabel (outputFile)
 			
 			if self.exportPS:
 				self.printExportPS (outputFile, self.psFilename)
 	
+	'''
+	Prints a .bfile for a common band structure
+	This method contains all needed settings
+	'''
+	def printComparisonBands (self, bands1, bands2):
+		with open ('bandsComparison.bfile', 'w') as outputFile:				
+			outputFile.write ("READ NXY \"eigenv1.dat\" \n")
+			
+			self.printFontSection (outputFile)
+			self.printTraces (outputFile, bands1, traceColor='black', firstBand=0)
+			
+			outputFile.write ("READ NXY \"eigenv2.dat\" \n")
+			
+			self.printTraces (outputFile, bands2, traceColor='red', firstBand=bands2.nBands)
+
+			self.printAxis (outputFile, bands1)			
+			self.printLabel (outputFile)
+			
+			if self.exportPS:
+				self.printExportPS (outputFile, self.psFilename)
+				
 	'''
 	Prints a .bfile for a band structure with character
 	This method contains all needed settings

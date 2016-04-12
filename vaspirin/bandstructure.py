@@ -35,7 +35,8 @@ class BandStructure (object):
 		referenceDict = {
 			'vbm' : self.eValence,
 			'efermi' : self.eFermi,
-			'e-fermi' : self.eFermi
+			'e-fermi' : self.eFermi,
+			'0' : 0,
 		}
 		
 		self.setReference (referenceDict.get(stringRef.lower(), self.eValence))
