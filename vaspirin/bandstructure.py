@@ -39,7 +39,11 @@ class BandStructure (object):
 			'0' : 0,
 		}
 		
-		self.setReference (referenceDict.get(stringRef.lower(), self.eValence))
+		try:
+			ref = float(stringRef)
+			self.setReference (ref)
+		except ValueError:
+			self.setReference (referenceDict.get(stringRef.lower(), self.eValence))
 		
 	# nElec = total number of electrons in the cell
 	def readNElec(self,fOutcar):
