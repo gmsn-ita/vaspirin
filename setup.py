@@ -17,7 +17,7 @@ setup (
 	entry_points = {
         "console_scripts": ['vaspirin = vaspirin.vaspirin:main']
         },
-	version='1.0',
+	version='1.1',
 	description='Painless VASP post-processing tool',
 	author='Daniel S. Koda, Ivan Guilhon',
 	author_email='danielskoda@gmail.com, ivanguilhonn@gmail.com ',

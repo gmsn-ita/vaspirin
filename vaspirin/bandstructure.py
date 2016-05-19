@@ -15,6 +15,7 @@ class BandStructure (object):
 	# Import all properties related to band structures
 	def __init__(self,fOutcar, nKPTignore):
 		self.nKPTignore = nKPTignore
+		self.soc = False
 		self.path = self.readPath (fOutcar)
 		self.nBands = self.readNbands (fOutcar)
 		self.recLattice = self.readRecLattice (fOutcar)
@@ -61,7 +62,11 @@ class BandStructure (object):
 			
 	# return the fundamental gap
 	def gap(self):
-		nval=self.nElec/2
+		if self.soc:
+			nval=int(self.nElec)
+		else:
+			nval=int(self.nElec/2)
+			
 		v_band=[]
 		c_band=[]	
 		for k in range(len(self.path)):
@@ -74,7 +79,11 @@ class BandStructure (object):
 
 	# return the valence band maximum
 	def readEValence(self):
-		nval=int(self.nElec/2)
+		if self.soc:
+			nval=int(self.nElec)
+		else:
+			nval=int(self.nElec/2)
+			
 		v_band=[]	
 		for k in range(len(self.path)):
 			v_band.append(self.eigenvals[k][nval-1])
@@ -82,7 +91,11 @@ class BandStructure (object):
 
 	# return the direct gap
 	def dGap(self):
-		nval=self.nElec/2
+		if self.soc:
+			nval=int(self.nElec)
+		else:
+			nval=int(self.nElec/2)
+			
 		allGaps=[]
 			
 		for k in range(len(self.path)):

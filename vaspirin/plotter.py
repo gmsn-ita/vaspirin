@@ -396,7 +396,7 @@ class Grace (object):
 			
 			outputFile.write ("READ NXY \"eigenv2.dat\" \n")
 			
-			self.printTraces (outputFile, bands2, traceColor='red', firstBand=bands2.nBands)
+			self.printTraces (outputFile, bands2, traceColor='red', firstBand=bands1.nBands)
 
 			self.printAxis (outputFile, bands1)			
 			self.printLabel (outputFile)

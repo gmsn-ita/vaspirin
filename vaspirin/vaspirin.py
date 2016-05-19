@@ -232,13 +232,22 @@ def main():
 			plt.setYaxis (min(float(yMin), float(yMax)), max(float(yMin), float(yMax)))
 		
 		# Read the reference for the band structure
-		[flagREFERENCE, referenceArgument] = testFlag('-ref', 'vbm', sys.argv)
+		[flagREFERENCE, referenceArgument1, referenceArgument2] = testFlag2args('-ref', 'vbm', 'vbm', sys.argv)
 		
 		if flagREFERENCE and flagBS:
-			bsData.setReferenceString (referenceArgument)
+			bsData.setReferenceString (referenceArgument1)
 		elif flagREFERENCE and flagCOMPARE:
-			bsData1.setReferenceString (referenceArgument)
-			bsData2.setReferenceString (referenceArgument)
+			bsData1.setReferenceString (referenceArgument1)
+			bsData2.setReferenceString (referenceArgument2)
+		
+		
+		[flagSOC, socArgument] = testFlag('-soc', '', sys.argv)
+		if flagSOC and flagBS:
+			bsData.soc = True
+		elif flagSOC and flagCOMPARE:
+			bsData1.soc = True
+			bsData2.soc = True
+			
 			
 		# plot using XMGrace
 		if flagBS:
