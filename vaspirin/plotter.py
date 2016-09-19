@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import os, shutil
+import numpy as np
+from scipy.interpolate import interp1d
 
 class DatFiles (object):
-	'''
+	"""
 	Generate .dat files for XMGrace
 	The files are generated in the current directory
-	'''
+	"""
 	
 	def __init__ (self, markerSize):
 		self.markerSize = markerSize
@@ -17,20 +19,26 @@ class DatFiles (object):
 		self.pointsInterpolate = numberPoints
 	
 	
-	'''
-	Creates the eigenv.dat file
-	Format:
-	1st column) normalized k-point (from 0 to 1, derived from the path length)
-	2nd column) eigenvalue
-	'''
 	def datEigenvals (self, bandStructure, datName='eigenv.dat'):
+		"""
+		Creates the eigenv.dat file
+		Format:
+		1st column) normalized k-point (from 0 to 1, derived from the path length)
+		2nd column) eigenvalue
+		"""
 		with open (datName,'w') as outputFile:
 			for band in range(bandStructure.nBands):
+				eigenvals = [row[band] for row in bandStructure.eigenvals]
+				spl = interp1d (bandStructure.xAxis, eigenvals, kind='cubic')
+				
 				for kpoint in range(1, len(bandStructure.xAxis)):
 					if self.flagInterpolate:
 						for interpol_kpt in range (self.pointsInterpolate+1):
 							t = (interpol_kpt)/(self.pointsInterpolate+1)
-							outputFile.write ("%.6f % 3.6f\n" % (((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint]), ((1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band]) - bandStructure.reference))
+							k = ((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint])
+							# E_k = ((1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band]) - bandStructure.reference # linear interpolation
+							E_k = spl(k) - bandStructure.reference # spline interpolation
+							outputFile.write ("%.6f % 3.6f\n" % (k, E_k))
 					else:
 						outputFile.write ("%.6f % 3.6f\n" % (bandStructure.xAxis[kpoint-1], bandStructure.eigenvals[kpoint-1][band] - bandStructure.reference))
 				
@@ -38,25 +46,25 @@ class DatFiles (object):
 				
 				outputFile.write ("\n")
 	
-	'''
-	Creates the bands_character folder
-	Each file contains the eigenvalues and contributions projected for each band
-	Format:
-	1st column) normalized k-point (from 0 to 1, derived from the path length)
-	2nd column) eigenvalue
-	
-	The following columns contain the relative contribution of each orbital, canonically:
-	3rd column) contribution of the s orbitals
-	4th column) contribution of the px + py orbitals
-	5th column) contribution of the pz orbitals
-	6th column) contribution of the d orbitals
-	
-	Depending on the functions, the contributions of other orbitals, e.g. dz2, may be explicited in other columns
-	However, this requires modifications on the code not yet implemented
-	
-	The markerSize variable scales the size of the marker plotted
-	'''
 	def datCharacter (self, bandStructure, bandCharacter):
+		"""
+		Creates the bands_character folder
+		Each file contains the eigenvalues and contributions projected for each band
+		Format:
+		1st column) normalized k-point (from 0 to 1, derived from the path length)
+		2nd column) eigenvalue
+		
+		The following columns contain the relative contribution of each orbital, canonically:
+		3rd column) contribution of the s orbitals
+		4th column) contribution of the px + py orbitals
+		5th column) contribution of the pz orbitals
+		6th column) contribution of the d orbitals
+		
+		Depending on the functions, the contributions of other orbitals, e.g. dz2, may be explicited in other columns
+		However, this requires modifications on the code not yet implemented
+		
+		The markerSize variable scales the size of the marker plotted
+		"""
 
 		try:
 			os.mkdir ('bands_character')
@@ -64,14 +72,20 @@ class DatFiles (object):
 			shutil.rmtree ('bands_character')
 			os.mkdir ('bands_character')
 			
-		for band in range(bandStructure.nBands):
+		for band in range(bandStructure.nBands):	
 			with open ("bands_character/band%02d.dat" % int(band+1),'w') as outputFile:
 				for kpoint in range(1, len(bandStructure.xAxis)):
 					if self.flagInterpolate:
+						eigenvals = [row[band] for row in bandStructure.eigenvals]
+						spl = interp1d (bandStructure.xAxis, eigenvals, kind='cubic')
+						
 						for interpol_kpt in range (self.pointsInterpolate+1):
 							t = (interpol_kpt)/(self.pointsInterpolate+1)
+							k = (1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint]
+							#E_k = (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference
+							E_k = spl(k) - bandStructure.reference # spline interpolation
 							
-							outputFile.write ("%.6f % 3.6f" % ((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint], (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+							outputFile.write ("%.6f % 3.6f" % (k, E_k))
 							
 							for i in range(len(bandCharacter.orbitalContributions[kpoint][band])):
 								outputFile.write(" %1.4f" % ((1-t)*float(bandCharacter.orbitalContributions[kpoint-1][band][i])*float(self.markerSize) + t*float(bandCharacter.orbitalContributions[kpoint][band][i])*float(self.markerSize)))
@@ -91,21 +105,23 @@ class DatFiles (object):
 									
 				outputFile.write ("\n")
 		
-	'''
-	Creates the bands_projected folder
-	Each file in the folder contains the eigenvalues and contributions projected for each band
-	Format:
-	1st column) normalized k-point (from 0 to 1, derived from the path length)
-	2nd column) eigenvalue
 	
-	The following columns contain the relative contribution of each material:
-	3rd column) contribution of the 1st material
-	4th column) contribution of the 2nd material
-	... and so on
-	
-	The markerSize variable scales the size of the marker plotted
-	'''
 	def datProjected (self, bandStructure, bandCharacter):
+		"""
+		Creates the bands_projected folder
+		Each file in the folder contains the eigenvalues and contributions projected for each band
+		Format:
+		1st column) normalized k-point (from 0 to 1, derived from the path length)
+		2nd column) eigenvalue
+		
+		The following columns contain the relative contribution of each material:
+		3rd column) contribution of the 1st material
+		4th column) contribution of the 2nd material
+		... and so on
+		
+		The markerSize variable scales the size of the marker plotted
+		"""
+		
 		if self.markerSize <= 0:
 			self.markerSize = 0.5
 			
@@ -119,10 +135,16 @@ class DatFiles (object):
 			with open ("bands_projected/band%02d.dat" % int(band+1),'w') as outputFile:
 				for kpoint in range(1, len(bandStructure.xAxis)):
 					if self.flagInterpolate:
+						eigenvals = [row[band] for row in bandStructure.eigenvals]
+						spl = interp1d (bandStructure.xAxis, eigenvals, kind='cubic')
+						
 						for interpol_kpt in range (self.pointsInterpolate+1):
 							t = (interpol_kpt)/(self.pointsInterpolate+1)
+							k = (1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint]
+							#E_k = (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference
+							E_k = spl(k) - bandStructure.reference # spline interpolation
 							
-							outputFile.write ("%.6f % 3.6f" % ((1-t)*bandStructure.xAxis[kpoint-1] + t*bandStructure.xAxis[kpoint], (1-t)*bandStructure.eigenvals[kpoint-1][band] + t*bandStructure.eigenvals[kpoint][band] - bandStructure.reference))
+							outputFile.write ("%.6f % 3.6f" % (k, E_k))
 					
 							for i in range(len(bandCharacter.materialContributions[kpoint-1][band])):
 								outputFile.write(" %1.4f" % ((1-t)*float(bandCharacter.materialContributions[kpoint-1][band][i])*float(self.markerSize) + t*float(bandCharacter.materialContributions[kpoint][band][i])*float(self.markerSize)))
@@ -141,7 +163,30 @@ class DatFiles (object):
 				outputFile.write ("\n")
 						
 				outputFile.write ("\n")
-				
+	
+	def datDOS (self, DOS, datName='dos.dat'):
+		"""
+		Creates the dos.dat file
+		Format:
+		1st column) eigenvalue
+		2nd column) eigenvalue
+		"""
+		with open (datName,'w') as outputFile:
+			for i in range(len(DOS.energies)):
+				outputFile.write ("% .3f %3.5f\n" % (DOS.energies[i] - DOS.reference, DOS.states[i]))
+	
+	def datDOSproj (self, DOS, datName='dosProj.dat'):
+		"""
+		Creates the dos.dat file
+		Format:
+		1st column) eigenvalue
+		2nd column) dos
+		"""
+		with open (datName,'w') as outputFile:
+			for material in (DOS.materialDOS):
+				for i in range(material.nEDOS):
+					outputFile.write ("% .3f %3.5f\n" % (material.totalDOS[i][0] - DOS.reference, material.totalDOS[i][1]))
+				outputFile.write ("\n")
 				
 class GraceConstants (object):
 	colors = {
@@ -182,14 +227,14 @@ class GraceConstants (object):
 	}
 
 class Grace (object):
-	'''
+	"""
 	Generate files with extension .bfile
 	Each one of these files is a XMGrace batch for the chosen option
-	'''
+	"""
 	
-	'''
+	"""
 	Default parameters for the plots
-	'''
+	"""
 	def __init__ (self):
 		self.setDefaultParameters() 
 
@@ -209,16 +254,16 @@ class Grace (object):
 		self.yMax = yMax
 		self.yMin = yMin
 	
-	'''
+	"""
 	xTicks[index] = ["label string", normalized index from 0 to 1]
-	'''
+	"""
 	def setXticks (self, ticksList):
 		self.xTicks = ticksList
 	
-	'''
+	"""
 	KPOINTS header: KPT_1 index_1, KPT_2 index_2 ...
 	Example G 1, M 20, K 40, G 60
-	'''
+	"""
 	def readXticks (self, fKpoints):
 		ticks = []
 		try:
@@ -243,9 +288,9 @@ class Grace (object):
 		self.subtitle = subtitleString
 
 	def printFontSection (self, outputFile):
-		'''
+		"""
 		Font section
-		'''		
+		"""		
 		outputFile.write ("map font %d to \"Optima\", \"Optima\" \n" % GraceConstants.fonts.get("optima"))
 		outputFile.write ("title font %d \n" % GraceConstants.fonts.get(self.font))
 		outputFile.write ("subtitle font %d \n" % GraceConstants.fonts.get(self.font))
@@ -364,15 +409,15 @@ class Grace (object):
 		
 		
 
-	'''
+	"""
 	Prints a .bfile for a common band structure
 	This method contains all needed settings
-	'''
+	"""
 	def printBandStructure (self, bands):
 		with open ('bands.bfile', 'w') as outputFile:				
-			'''
+			"""
 			Read the file
-			'''
+			"""
 			outputFile.write ("READ NXY \"eigenv.dat\" \n")
 			
 			self.printFontSection (outputFile)
@@ -383,10 +428,10 @@ class Grace (object):
 			if self.exportPS:
 				self.printExportPS (outputFile, self.psFilename)
 	
-	'''
+	"""
 	Prints a .bfile for a common band structure
 	This method contains all needed settings
-	'''
+	"""
 	def printComparisonBands (self, bands1, bands2):
 		with open ('bandsComparison.bfile', 'w') as outputFile:				
 			outputFile.write ("READ NXY \"eigenv1.dat\" \n")
@@ -404,16 +449,16 @@ class Grace (object):
 			if self.exportPS:
 				self.printExportPS (outputFile, self.psFilename)
 				
-	'''
+	"""
 	Prints a .bfile for a band structure with character
 	This method contains all needed settings
 	The variable markerSize specifies the size of the marker while printing the bands
-	'''
+	"""
 	def printBandCharacter (self, bands):
 		with open ('bandsCharacter.bfile', 'w') as outputFile:				
-			'''
+			"""
 			Read the file
-			'''
+			"""
 			
 			self.printFontSection (outputFile)
 			self.printTracesCharacter (outputFile, bands)
@@ -423,15 +468,15 @@ class Grace (object):
 			if self.exportPS:
 				self.printExportPS (outputFile, self.psFilename)
 	
-	'''
+	"""
 	Prints a .bfile for a band structure projected onto the specified materials (file PROJECTION)
 	This method contains all needed settings
-	'''
+	"""
 	def printBandProjected (self, bands, projectedBands):
 		with open ('bandsProjected.bfile', 'w') as outputFile:				
-			'''
+			"""
 			Read the file
-			'''
+			"""
 			
 			self.printFontSection (outputFile)
 			self.printTracesProjected (outputFile, bands, projectedBands)

@@ -169,46 +169,47 @@ class PROCAR (object):
 		return
 				
 		
-	'''
-	 The list ionsVsMaterials should indicate the material to which the ion belong, e.g.:
-	   i) for two materials based on six atoms: [HfS2, HfS2, HfS2, ZrS2, ZrS2, ZrS2]
-	   ii) for three materials based on nine atoms with an odd order: [Mat1, Mat1, Mat3, Mat2, Mat2, Mat2, Mat3, Mat3, Mat1]
 	
-	 The file PROJECTION (default name) should have the following format:
-	 
-	 Material1Name ionsBelongingToMat1
-	 Material2Name ionsBelongingToMat2
-	 Material3Name ionsBelongingToMat3
-	 ...
-	 
-	 For the examples commented above, the file should be:
-	   i) PROJECTION
-	   
-	   HfS2 1,2,3
-	   ZrS2 4,5,6
-	   
-	   i) OR
-	   
-	   HfS2 1..3
-	   ZrS2 4..6
-	   
-	   ii) PROJECTION
-	   Mat1 1,2,9
-	   Mat2 4,5,6
-	   Mat3 3,7,8
-	   
-	   ii) OR
-	   
-	   Mat1 1,2,9
-	   Mat2 4..6
-	   Mat3 3,7,8
-	   
-	 The material divider should be the new line feed \n
-	 The ion divider should be the comma ,
-	 To start listing the ions, use a space
-	 The label should not contain spaces
-	''' 
 	def createIonVsMaterials (self, fileProjection):
+		'''
+		 The list ionsVsMaterials should indicate the material to which the ion belong, e.g.:
+		   i) for two materials based on six atoms: [HfS2, HfS2, HfS2, ZrS2, ZrS2, ZrS2]
+		   ii) for three materials based on nine atoms with an odd order: [Mat1, Mat1, Mat3, Mat2, Mat2, Mat2, Mat3, Mat3, Mat1]
+		
+		 The file PROJECTION (default name) should have the following format:
+		 
+		 Material1Name ionsBelongingToMat1
+		 Material2Name ionsBelongingToMat2
+		 Material3Name ionsBelongingToMat3
+		 ...
+		 
+		 For the examples commented above, the file should be:
+		   i) PROJECTION
+		   
+		   HfS2 1,2,3
+		   ZrS2 4,5,6
+		   
+		   i) OR
+		   
+		   HfS2 1..3
+		   ZrS2 4..6
+		   
+		   ii) PROJECTION
+		   Mat1 1,2,9
+		   Mat2 4,5,6
+		   Mat3 3,7,8
+		   
+		   ii) OR
+		   
+		   Mat1 1,2,9
+		   Mat2 4..6
+		   Mat3 3,7,8
+		   
+		 The material divider should be the new line feed \n
+		 The ion divider should be the comma ,
+		 To start listing the ions, use a space
+		 The label should not contain spaces
+		''' 
 		try:
 			fileIn=open(fileProjection,'r')
 		except FileNotFoundError:
