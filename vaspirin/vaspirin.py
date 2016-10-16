@@ -2,300 +2,169 @@
 
 import sys
 from . import *
+import argparse
 
-'''
-This is the main script from vaspirin.py
-call it using: vaspirin -$tags -$DesiredFileNames
-
-READING TAGS:
-By default, informations are extracted from OUTCAR and PROCAR files. If tag -fromdat is activated, vaspita will only read the information from the given .dat file.
-
--dos: ask for Density of State informations.
--bs: ask for Electronic Band Structure informations.
--char: ask for Character of electronic bands projected on atomic orbitals (s,p,d,f).
--proj: ask for Character of electronic bands projected on specific atoms.
-
-OUTPUT AND PLOTTING TAGS:
--fromdat: Sets a given .dat file as the source of information ask. 
-	e.g.: python vaspita.py -bs -fromdat bandsStructure.dat
+def positive_int (value):
+	'''
+	Type for allowing only positive int values for argparser
+	taken from http://stackoverflow.com/questions/14117415/using-argparse-allow-only-positive-integers
+	'''
 	
-	If not active, the script will ask for OUTCAR and/or procar files.
-
--plot: Create .dat, .ps and .pdf files
-
-
-WRITING TAGS:
--kptgen: generate one KPOINTS file with a desired path
-
-
-
-
-'''
-
-
-
-###########################################   FUNCTIONS    #######################################################
-
-def testFlag(tag, defaultName,args):
-	fileName=defaultName
-	flag=False
-	if tag in  args:
-		flag=True
-		index= (sys.argv).index(tag)
-		try:
-			newName=sys.argv[index +1]
-			if  newName[0]!='-':
-				fileName=newName
-		except (IOError,IndexError,RuntimeError, TypeError, NameError):
-			fileName=defaultName
-
-	return [flag, fileName]
-
-
-# Same as function testFlag, but receives two arguments for the tag
-def testFlag2args(tag, default1, default2, args):
-	attribute1 = default1
-	attribute2 = default2
+    ivalue = int(value)
+    if ivalue < 0:
+         raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+    return ivalue
+    
+def parseArgs():
+	"""
+	Parse arguments from the command line. Uses the `argparse` package to
+	establish all positional and optional arguments.
+	"""
 	
-	flag=False
+	helloDescription = ("Painless VASP postprocessing tool\n" + 
+						"Written by Daniel S. Koda and Ivan Guilhon\n" +
+						"Group of Semiconductor Materials and Nanotechnology\n" +
+						"Instituto Tecnologico de Aeronautica, Brazil\n" +
+						"http://www.gmsn.ita.br/?q=en"
+						
+	parser = argparse.ArgumentParser(description=helloDescription,
+									epilog= "Last revision: Oct. 2016.",
+									prog="Vaspirin")
+
+	# Vaspirin configurations
+	parser.add_argument('-q', '--quiet', action='store_true',
+						help="do not display text on the output window (default: False)")
 	
-	if tag in  args:
-		flag=True
-		index= (sys.argv).index(tag)
-		
-		isThereAnyArgument = False
-		# Try to read the first attribute
-		try:
-			newName1 = sys.argv[index + 1]
-			if  newName1[0] != '-':
-				attribute1 = newName1
-				isThereAnyArgument = True
-			elif newName1[1].isnumeric():
-				attribute1 = newName1
-				isThereAnyArgument = True
-				
-		# If the reading fails, returns to the default value
-		except (IOError,IndexError,RuntimeError, TypeError, NameError):
-			attribute1 = default1
-			isThereAnyArgument = False
-		
-		if isThereAnyArgument:
-			# Try to read the second attribute
-			try:
-				newName2 = sys.argv[index + 2]
-				if  newName2[0] != '-':
-					attribute2 = newName2
-				elif newName2[1].isnumeric():
-					attribute2 = newName2
-					
-			# If the reading fails, returns to the default value
-			except (IOError,IndexError,RuntimeError, TypeError, NameError):
-				attribute2 = default2	
-
-	return [flag, attribute1, attribute2]
-
-def hello ():
-	print ('\n**************************************************')
-	print ('WELCOME TO VASPIRIN.PY')
-	print ('**************************************************\n')
-
-	print ('Made by Daniel S. Koda and Ivan Guilhon.')
-	print ('Group of Semiconductor Materials and Nanotechnology')
-	print ('Instituto Tecnologico de Aeronautica')
-	print ('http://www.gmsn.ita.br/?q=en')
-	print ('STARTING LOG...')
+	parser.add_argument('-k', '--kpoints', default='KPOINTS',
+						help="select KPOINTS file (default: KPOINTS)")
 	
+	parser.add_argument('-v', '--version', action='version', version='%(prog)s 1.2')
+						
+	# Band structure options					
+	parser.add_argument('-b', '--bands', action='store_true',
+						help="generate simple band structures with XMGrace (default: False)")
+	
+	parser.add_argument('-o', '--orbital', action='store_true',
+						help="generate band structures projected onto atomic orbitals with XMGrace" +
+						" (default: False).")
+	
+	parser.add_argument('-p', '--projected', action='store_true',
+						help="generate band structures projected onto atomic sites with XMGrace" +
+						" (default: False).")
+
+	parser.add_argument('-c', '--compare', action='store_true',
+						help="generate band structures by comparing two input files" +
+						" (inputs: eigenv1.dat eigenv2.dat).",
+						)
+						
+	# Band structure tweaking					
+	parser.add_argument('-i', '--ignore', type=positive_int, default=0,
+						help="ignore the first N k-points when plotting bands (default: 0)")
+	
+	parser.add_argument('-t', '--interpolate', type=positive_int, default=0,
+						help="interpolate N k-points between each pair of k-points when plotting bands (default: 0)")
+						
+	parser.add_argument('-m', '--marker', type=float, default=0.5,
+						help="size of the marker for projected bands (default: 0.5)")
+						
+	parser.add_argument('-y', '--yaxis', type=float, nargs=2, default=[-3, 3],
+						help="set the y-axis range for the band structure" +
+						" (default: -3 to 3).",
+						metavar=('Y_MIN', 'Y_MAX'))					
+
+	parser.add_argument('-r', '--reference', default='vbm',
+						help="reference for the 0 eV in band structures (default: vbm)")
+
+	parser.add_argument('-s', '--soc', action='store_true',
+						help="plot bands from non-collinear calculations (default: False)")
+	
+	# Density of states options
+	
+	parser.add_argument('-d', '--dos', default='DOSCAR',
+						help="generate simple density of states with XMGrace")
+	
+	return parser.parse_args()
+
+def printHello ():
+	'''
+	Print hello message.
+	'''
+	
+	print ("***********************")
+	print ("     vaspirin v1.2     ")
+	print ("***********************")
+
+def printRunDescription (args):
+	'''
+	Print description of the options chosen and the crystals input.
+	'''
+	
+	leftJustSpace = 20
+	print ("input file:".ljust(leftJustSpace) + "%s" % args.input_file)
+	print ("output file:".ljust(leftJustSpace) + "%s" % args.output)
+	print ("molecule:".ljust(leftJustSpace) + "from atom %d to %d" % (args.molecule[0], args.molecule[1]))
+	print ("angles:".ljust(leftJustSpace) + "from %.2f to %.2f deg" % (args.angles[0], args.angles[1]))
+	print ("angles_step:".ljust(leftJustSpace) + "%.2f deg" % args.angles_step)
+	print ("reference:".ljust(leftJustSpace) + "atom %s" % args.ref)
+	print ("axis:".ljust(leftJustSpace) + "%s" % args.axis)
+
+
 def main():
+	'''
+	vaspirin main function
 	
-	###########################################     CODE     #######################################################
+	By default, informations are extracted from typical VASP files, such as:
+	OUTCAR, PROCAR, KPOINTS, DOSCAR
+	'''
 	
-	[flagQUIET, quietPostArgument] = testFlag('-quiet', '', sys.argv)
-	if not flagQUIET:
-		hello()
-		
+	## Parse arguments from the command line
+	args = parseArgs()
+	
+	## Print information on the screen only if the user wants to receive it
+	if not args.quiet:
+		printHello ()
+		printRunDescription (args)
 
-	###################################     IDENTIFICATING TASKS        #########################################
+	## Create classes responsible for processing files
+	dat = plotter.DatFiles ()
+	dat.setInterpolateOptions (args.interpolate)
+	plt = plotter.Grace ()
 	
-	# do not plot the first N k-points if '-ignore N' is given
-	[flagIGNORE, nKPTignore] = testFlag('-ignore', 0, sys.argv)
-	
+	# Reading the KPOINTS file:
 	try:
-		nKPTignore = int (nKPTignore)
-	except ValueError:
-		print ('Invalid -ignore argument. Please input an integer number. Using 0 as default...')
-		nKPTignore = 0
-	
-	# fromdat FLAG
-	[flagFROMDAT,DATFile] = testFlag('-fromdat', 'input.dat',sys.argv)
-	if flagFROMDAT:
-		print ('Info extracted from file:', DATFile)
-		#Read dat file
-
-	
-	# BANDSTRUCTURE FLAG
-	[flagBS,OUTCARfile] = testFlag('-bs', 'OUTCAR',sys.argv)
-	if flagBS and not(flagFROMDAT):
-		print ('OUTCAR info extracted from: ' + OUTCARfile)
-		bsData=bandstructure.BandStructure(OUTCARfile, nKPTignore)
-
-	# Compare band structures FLAG
-	[flagCOMPARE, OUTCAR1, OUTCAR2] = testFlag2args ('-compare', 'OUTCAR1', 'OUTCAR2', sys.argv)
-	if flagCOMPARE and not(flagFROMDAT):
-		print ('Comparing ' + OUTCAR1 + ' with ' + OUTCAR2)
-		bsData1 = bandstructure.BandStructure(OUTCAR1, nKPTignore)
-		bsData2 = bandstructure.BandStructure(OUTCAR2, nKPTignore)
-
-
-	# DOS FLAG	
-	[flagDOS,DOSCARfile] = testFlag('-dos', 'DOSCAR',sys.argv)
-	if flagDOS and not(flagFROMDAT):
-		print ('DOSCAR info extracted from: ' + DOSCARfile)
-		dosData=dos.DOS(DOSCARfile)
-
-
-	# CHAR FLAG
-	[flagCHAR,PROCARfile] = testFlag('-char', 'PROCAR',sys.argv)
-	if flagCHAR and not(flagFROMDAT):
-		print ('Band Character info extracted from: ' + PROCARfile)
-		procarData=bandcharacter.PROCAR(PROCARfile, nKPTignore)
-
-
-	# PROJ FLAG
-	[flagPROJ,PROCARfile,PROJECTIONfile] = testFlag2args('-proj', 'PROCAR', 'PROJECTION',sys.argv)
-	
-	if flagPROJ and not(flagFROMDAT):
-		print ('Projection on atomic orbitals info extracted from: ' + PROCARfile)
-		
-		projData = bandcharacter.PROCAR (PROCARfile, nKPTignore)
-		
-		# Opens the file 'PROJECTION' if the argument -projdata is not specified
-		projData.createIonVsMaterials (PROJECTIONfile)
-
-	[flagKPOINTS,KPOINTSfile] = testFlag('-kpt', 'KPOINTS',sys.argv)
-	
-	#KPTGEN FLAG
-	#these methods will not read files, but only write new ones.  
-
-
-
-	###################################     MAKING OUTPUTS        #########################################
-	
-	# PLOT FLAG
-	[flagPLOT,figureName] = testFlag('-plot', 'figure',sys.argv)
-	if flagPLOT:
-		
-		# Load marker size for the plotter
-		[flagMARKER, markerSize] = testFlag('-markersize', 0.5, sys.argv)
-		
-		try:
-			markerSize = float (markerSize)
-			if markerSize <= 0:
-				raise ValueError ('Negative marker size')
-		except ValueError:
-			print ('Invalid -markersize argument. Please input a float number. Using 0.5 as default...')
-			markerSize = 0.5
-		
-		[flagINTERPOLATE, interpolateArgument] = testFlag('-interpolate', '', sys.argv)
-		
-		if flagINTERPOLATE:
-			try:
-				interpolateArgument = int (interpolateArgument)
-				if interpolateArgument <= 0:
-					raise ValueError ('Negative number of points')
-			except ValueError:
-				print ('Invalid -interpolate argument. Please input an integer number. Using 0 as default...')
-				interpolateArgument = 0
+		plt.readXticks (KPOINTSfile)
+	except:
+		print ("Wrong header formatting in KPOINTS file. Plotting without k-points on the x axis...")
 			
-		dat = plotter.DatFiles (markerSize)
-		dat.setInterpolateOptions (flagINTERPOLATE, interpolateArgument)
-		plt = plotter.Grace ()
 		
-		[flagExportPS, psFilename] = testFlag('-ps', 'bands',sys.argv)
+	# plot using XMGrace
+	if flagBS:
+		if flagDOS:
+			print ("Feature not yet implemented. Feel free to work on it if you want!")
+			# Print DOS with bands
 		
-		plt.exportPS = flagExportPS
-		plt.psFilename = psFilename
-		
-		
-		# Yet to implement: export PDF to figureName
-		print ('Printing results on:', psFilename, '\n')
-		
-		# Reading the KPOINTS file:
-		try:
-			plt.readXticks (KPOINTSfile)
-		except:
-			print ("Wrong header formatting in KPOINTS file. Plotting without k-points on the x axis...")
-		
-		# Read the y axis minimum and maximum values
-		[flagYAXIS, yMin, yMax] = testFlag2args ('-yaxis', -3, 3, sys.argv)
-
-		if flagYAXIS:
-			plt.setYaxis (min(float(yMin), float(yMax)), max(float(yMin), float(yMax)))
-		
-		# Read the reference for the band structure
-		[flagREFERENCE, referenceArgument1, referenceArgument2] = testFlag2args('-ref', 'vbm', 'vbm', sys.argv)
-		
-		if flagREFERENCE and flagBS:
-			bsData.setReferenceString (referenceArgument1)
-		elif flagREFERENCE and flagCOMPARE:
-			bsData1.setReferenceString (referenceArgument1)
-			bsData2.setReferenceString (referenceArgument2)
-		
-		
-		[flagSOC, socArgument] = testFlag('-soc', '', sys.argv)
-		if flagSOC and flagBS:
-			bsData.soc = True
-		elif flagSOC and flagCOMPARE:
-			bsData1.soc = True
-			bsData2.soc = True
+		elif flagCHAR:
+			dat.datCharacter (bsData, procarData)
+			plt.printBandCharacter (bsData)
+			print ("Print the results using XMgrace\n xmgrace -batch bandsCharacter.bfile")
 			
-			
-		# plot using XMGrace
-		if flagBS:
-			if flagDOS:
-				print ("Feature not yet implemented. Feel free to work on it if you want!")
-				# Print DOS with bands
-			
-			elif flagCHAR:
-				dat.datCharacter (bsData, procarData)
-				plt.printBandCharacter (bsData)
-				print ("Print the results using XMgrace\n xmgrace -batch bandsCharacter.bfile")
-				
-			elif flagPROJ:
-				dat.datProjected (bsData, projData)
-				plt.printBandProjected (bsData, projData)
-				print ("Print the results using XMgrace\n xmgrace -batch bandsProjected.bfile")
-			else:
-				dat.datEigenvals (bsData)
-				plt.printBandStructure (bsData)
-				print ("Print the results using XMgrace\n xmgrace -batch bands.bfile")
-		
-		elif flagCOMPARE:
-				dat.datEigenvals (bsData1, datName='eigenv1.dat')
-				dat.datEigenvals (bsData2, datName='eigenv2.dat')
-				plt.printComparisonBands (bsData1, bsData2)
-				print ("Print the results using XMgrace\n xmgrace -batch bandsComparison.bfile")
-				
+		elif flagPROJ:
+			dat.datProjected (bsData, projData)
+			plt.printBandProjected (bsData, projData)
+			print ("Print the results using XMgrace\n xmgrace -batch bandsProjected.bfile")
 		else:
-			if flagDOS:
-				print ("Feature not yet implemented. Feel free to work on it if you want!")
-		
-		print ("(add -hardcopy -nosafe to the xmgrace command if you want to print it directly)")
-
-	# PYPLOT FLAG
-	[flagPLOT,figureName] = testFlag('-pyplot', 'figure',sys.argv)
+			dat.datEigenvals (bsData)
+			plt.printBandStructure (bsData)
+			print ("Print the results using XMgrace\n xmgrace -batch bands.bfile")
 	
-	if flagPLOT:
-		print ('Printing results on:', figureName)
-
-		if flagBS:
-			if flagDOS:
-				pyplot.plotBSDOS(bsData,dosData,figureName)
-			elif flagCHAR:
-				pyplot.plotBSCHAR(bsData,procarData,figureName)
-			else:
-				pyplot.plotBS(bsData,figureName)
-
-		else:
-			if flagDOS:
-				pyplot.plotDOS(dosData,figureName)
-
+	elif flagCOMPARE:
+			dat.datEigenvals (bsData1, datName='eigenv1.dat')
+			dat.datEigenvals (bsData2, datName='eigenv2.dat')
+			plt.printComparisonBands (bsData1, bsData2)
+			print ("Print the results using XMgrace\n xmgrace -batch bandsComparison.bfile")
+			
+	else:
+		if flagDOS:
+			print ("Feature not yet implemented. Feel free to work on it if you want!")
+	
+	print ("(add -hardcopy -nosafe to the xmgrace command if you want to print it directly)")
