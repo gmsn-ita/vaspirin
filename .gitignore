@@ -56,8 +56,17 @@ coverage.xml
 docs/_build/
 docs/latex
 
+docs/old_guides
+
 # PyBuilder
 target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Test scripts
+tests/tmp_scripts
+
+# Figures
+*.svg
+*.png

@@ -3,10 +3,8 @@ Painless post-processing tools for VASP
 Made by Daniel S. Koda and Ivan Guilhon @ GMSN
 
 Install the script by executing:
-$ python setup.py install --user
+$ sudo pip install vaspirin
 OR
-# python setup.py install
+# sudo pip install vaspirin
 
-Execute the package by using:
-$ vaspirin -$tags -$DesiredFileNames
 For further information on how to use this package, please refer to the instructions manual

@@ -1,2 +1,2 @@
-__version__ = '0.0'
-__all__ = ["bandcharacter", "bandstructure", "dos", "kptGen", "plotter", "pyplot"]
+__version__ = '1.2'
+__all__ = ["datIO","doscar","graceIO","outcar","poscar","procar","splitter"]
