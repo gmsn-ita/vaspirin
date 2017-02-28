@@ -197,6 +197,7 @@ def main():
 		
 	bsData = outcar.BandStructure (nKPTignore = args.ignore)
 	bsData.setSOC (args.soc)
+	bsData.setReferenceString (args.ref)
 	
 	## Atomic orbital-projected band structure
 	if args.orbital:

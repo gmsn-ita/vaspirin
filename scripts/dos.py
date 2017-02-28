@@ -185,6 +185,7 @@ def main():
 	xmgrace.setView (graceIO.GraceConstants.dosView)
 	
 	dos = doscar.DOS(fDoscar = "DOSCAR")
+	dos.setReferenceString (args.ref)
 	
 	## Atomic orbital-projected DOS
 	if args.orbital:

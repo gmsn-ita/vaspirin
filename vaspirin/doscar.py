@@ -124,7 +124,28 @@ class DOS (object):
 		Set a new reference for the eigenvalues
 		"""
 		self.reference = newRef
+	
+	def setReferenceString (self, stringRef):
+		"""
+		Set a new reference for the eigenvalues using a string as argument
+		"""
+		
+		referenceDict = {
+			'efermi' : self.eFermi,
+			'e-fermi' : self.eFermi,
+			'ef' : self.eFermi,
+			'0' : 0,
+		}
+		
+		try:
+			## If the argument stringRef is simply a number, use it as reference
+			ref = float(stringRef)
+			self.setReference (ref)
 			
+		except ValueError:
+			## If the argument stringRef is not a number, checks whether this string
+			## is compatible with the referenceDict
+			self.setReference (referenceDict.get(stringRef.lower(), self.eFermi))		
 
 	def setProjection (self, projection):
 		"""
