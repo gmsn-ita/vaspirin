@@ -17,7 +17,7 @@ def parseArgs():
 
 	parser.add_argument('input_file', help="POSCAR input file")
 	
-	parser.add_argument('-o', '--output', default='POSCAR', help="output name for the generated files. Default: POSCAR_displacement")
+	parser.add_argument('-o', '--output', default=None, help="output name for the generated files. Default: input_file_displacement")
 	
 	parser.add_argument('-d', '--displacement', type=float, nargs=2, default=[0.0, 0.0], help="interval of displacements (in Angstrom) to generate (default: only 0 Angs)", metavar=('DELTA_MIN', 'DELTA_MAX'))
 	
@@ -77,6 +77,9 @@ def main():
 	'''
 	
 	args = parseArgs()
+	
+	## Setting the default output to the input filename
+	args.output = args.output if args.output else args.input_file	
 	
 	if not args.quiet:
 		print ("***************************")
