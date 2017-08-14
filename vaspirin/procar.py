@@ -114,6 +114,10 @@ class PROCAR (object):
 					dxzCont = float(lines[3+self.nIons].split()[8])/totCont
 					dx2Cont = float(lines[3+self.nIons].split()[9])/totCont
 					contributions[k-self.nKPTignore-2][j-1].extend([sCont, pyCont + pxCont, pzCont, dxyCont + dyzCont + dz2Cont + dxzCont + dx2Cont])
+					## Dangerous part of the code:
+					## To tweak the contributions as wanted
+					## Implement later on this on a script...
+					#~ contributions[k-self.nKPTignore-2][j-1].extend([4*dz2Cont, 0, 4*dxzCont, 0])
 				else:
 					contributions[k-self.nKPTignore-2][j-1].extend([0,0,0,0])       
 		
