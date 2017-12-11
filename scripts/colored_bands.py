@@ -147,14 +147,14 @@ def main():
 	
 	## Call the function make_cmap which returns your colormap
 	my_cmap = make_cmap(colors, bit=True)
-
+	
 	## Check what size is the marker
 	with open (args.input_folder + "/band01.dat", 'r') as f:
 		## Read the first line
 		l = f.readline().split()
 		
 		## Convert the first line to float numbers
-		l = [float(i) for i in l]
+		l = [float(i) for i in l if i]
 		
 		## We find the marker size simply by summing the two contributions
 		markerSize = l[2] + l[3]
@@ -165,16 +165,16 @@ def main():
 
 	## Creates a figure for the 
 	fig = plt.figure (figsize=(args.size[0],args.size[1]))
-
+	
 	## Plot the specified bands
-	for i in range (args.bands[0], args.bands[1]):
+	for i in range (args.bands[0], args.bands[1]):	
 		try:
 			k,E,p1,p2 = np.loadtxt (args.input_folder + ("/band%02d.dat" % i), unpack = True)
 		except FileNotFoundError:
 			print ("Band out of range! Check if you have correctly inserted the bands you want to draw.")
 			sys.exit(1)
 		
-		plt.scatter(k, E, c=p2, norm=norm, cmap = my_cmap, linewidth='0')
+		plt.scatter(k,E, c=p2, norm=norm, cmap=my_cmap, linewidth=0)
 
 	
 	## Set the axis limits
@@ -183,7 +183,7 @@ def main():
 	axes.set_ylim([args.yaxis[0],args.yaxis[1]])
 	axes.set_xticklabels([])
 	axes.xaxis.set_ticks_position('none')
-
+	
 	## Include the legend if ordered to do so
 	if args.legend:
 		cbar = plt.colorbar()
@@ -191,10 +191,11 @@ def main():
 
 	## Print the figure
 	fig.savefig (args.output)
-	
+
 	## Show the figure if ordered to do so
 	if args.show:
 		plt.show()
+		
 	
 		
 if __name__ == "__main__":
